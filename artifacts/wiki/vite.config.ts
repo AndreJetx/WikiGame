@@ -15,6 +15,7 @@ const basePath = process.env.BASE_PATH ?? "/";
 
 export default defineConfig({
   base: basePath,
+  envDir: path.resolve(import.meta.dirname, "../.."),
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
@@ -31,11 +32,12 @@ export default defineConfig({
   server: {
     port,
     strictPort: true,
-    host: "0.0.0.0",
+    // Listen on IPv4+IPv6 so Chrome's `localhost` (::1) works, not only 127.0.0.1
+    host: true,
     allowedHosts: true,
     proxy: {
       "/api": {
-        target: "http://localhost:8080",
+        target: "http://127.0.0.1:8080",
         changeOrigin: true,
       },
     },
@@ -45,7 +47,7 @@ export default defineConfig({
   },
   preview: {
     port,
-    host: "0.0.0.0",
+    host: true,
     allowedHosts: true,
   },
 });

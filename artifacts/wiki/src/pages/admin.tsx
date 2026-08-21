@@ -13,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RichEditor } from "@/components/rich-editor";
 import { useQueryClient } from "@tanstack/react-query";
+import { ImageUploadField } from "@/components/image-upload-field";
 import { Edit, Trash, Plus } from "lucide-react";
 
 export function Admin() {
@@ -184,10 +185,10 @@ function AdminDashboard() {
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">URL da Imagem</label>
-                    <Input value={formData.imageUrl} onChange={e => setFormData({...formData, imageUrl: e.target.value})} />
-                  </div>
+                  <ImageUploadField
+                    value={formData.imageUrl}
+                    onChange={(imageUrl) => setFormData({ ...formData, imageUrl })}
+                  />
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Resumo</label>

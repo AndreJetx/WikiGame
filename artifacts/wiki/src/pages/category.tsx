@@ -1,5 +1,6 @@
 import { Layout } from "@/components/layout";
-import { Sidebar, CATEGORIES } from "@/components/sidebar";
+import { Sidebar, CATEGORIES, CategoryIcon } from "@/components/sidebar";
+import { CloudinaryImage } from "@/components/cloudinary-image";
 import { useRoute, Link } from "wouter";
 import { useListArticles, getListArticlesQueryKey } from "@workspace/api-client-react";
 import { motion } from "framer-motion";
@@ -26,8 +27,6 @@ export function Category() {
     );
   }
 
-  const Icon = categoryInfo.icon;
-
   return (
     <Layout withSidebar>
       <Sidebar />
@@ -44,7 +43,11 @@ export function Category() {
           </div>
           <div className="flex items-center gap-4">
             <div className="p-3 rounded-xl bg-primary/20">
-              <Icon className="w-8 h-8 text-primary" />
+              <CategoryIcon
+                category={categoryInfo}
+                className="w-8 h-8"
+                lucideClassName="w-8 h-8 text-primary"
+              />
             </div>
             <div>
               <h1 className="text-3xl font-serif font-bold">{categoryInfo.name}</h1>
@@ -70,7 +73,14 @@ export function Category() {
                   <Card className="h-full hover:border-primary/50 transition-colors bg-card/50 cursor-pointer overflow-hidden group">
                     {article.imageUrl && (
                       <div className="h-32 w-full overflow-hidden border-b border-border">
-                        <img src={article.imageUrl} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                        <CloudinaryImage
+                          src={article.imageUrl}
+                          alt={article.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                          width={640}
+                          height={256}
+                          crop="fill"
+                        />
                       </div>
                     )}
                     <CardHeader className={article.imageUrl ? 'pt-4' : ''}>

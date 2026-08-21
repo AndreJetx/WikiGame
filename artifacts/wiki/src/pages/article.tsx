@@ -1,5 +1,6 @@
 import { Layout } from "@/components/layout";
 import { Sidebar, CATEGORIES } from "@/components/sidebar";
+import { CloudinaryImage } from "@/components/cloudinary-image";
 import { useRoute, Link } from "wouter";
 import { useGetArticle, getGetArticleQueryKey } from "@workspace/api-client-react";
 import { motion } from "framer-motion";
@@ -70,7 +71,14 @@ export function Article() {
 
             {article.imageUrl && (
               <div className="mb-10 rounded-2xl overflow-hidden border border-border/50 shadow-lg not-prose">
-                <img src={article.imageUrl} alt={article.title} className="w-full max-h-[500px] object-cover" />
+                <CloudinaryImage
+                  src={article.imageUrl}
+                  alt={article.title}
+                  className="w-full max-h-[500px] object-cover"
+                  width={1400}
+                  height={500}
+                  crop="fill"
+                />
               </div>
             )}
 

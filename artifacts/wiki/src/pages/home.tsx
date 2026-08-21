@@ -1,5 +1,6 @@
 import { Layout } from "@/components/layout";
-import { Sidebar, CATEGORIES } from "@/components/sidebar";
+import { Sidebar, CATEGORIES, CategoryIcon } from "@/components/sidebar";
+import { CloudinaryImage } from "@/components/cloudinary-image";
 import { Link } from "wouter";
 import coverImage from "@assets/legend-of-elements-upcoming-launch-cover_1779364693164.jpg";
 import { motion } from "framer-motion";
@@ -102,7 +103,14 @@ export function Home() {
                   <Card className="h-full hover:border-primary/50 transition-colors bg-card/50 cursor-pointer overflow-hidden group">
                     {article.imageUrl && (
                       <div className="h-24 w-full overflow-hidden">
-                        <img src={article.imageUrl} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                        <CloudinaryImage
+                          src={article.imageUrl}
+                          alt={article.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                          width={640}
+                          height={192}
+                          crop="fill"
+                        />
                       </div>
                     )}
                     <CardHeader className={article.imageUrl ? 'pt-4' : ''}>
@@ -130,9 +138,15 @@ export function Home() {
                 <Link key={article.id} href={`/wiki/${article.category}/${article.slug}`}>
                   <div className="flex items-center gap-4 p-4 rounded-xl border border-border/50 hover:bg-primary/5 transition-colors cursor-pointer group bg-card/30">
                     <div className="w-12 h-12 rounded-lg bg-primary/20 flex items-center justify-center shrink-0 group-hover:bg-primary/30 transition-colors">
-                      {CATEGORIES.find(c => c.slug === article.category)?.icon && (() => {
-                        const Icon = CATEGORIES.find(c => c.slug === article.category)!.icon;
-                        return <Icon className="w-6 h-6 text-primary" />;
+                      {(() => {
+                        const cat = CATEGORIES.find(c => c.slug === article.category);
+                        return cat ? (
+                          <CategoryIcon
+                            category={cat}
+                            className="w-7 h-7"
+                            lucideClassName="w-6 h-6 text-primary"
+                          />
+                        ) : null;
                       })()}
                     </div>
                     <div>

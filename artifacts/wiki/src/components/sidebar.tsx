@@ -1,17 +1,23 @@
+import type { ElementType } from "react";
 import { Link } from "wouter";
-import { Book, Swords, Dog, Skull, Crosshair, Map, History, Home, CalendarDays, Ghost } from "lucide-react";
 import { useListCategories, getListCategoriesQueryKey } from "@workspace/api-client-react";
 import equipmentIcon from "@assets/equipment-icon.png";
 import spiritsIcon from "@assets/spirits-icon.png";
 import classesIcon from "@assets/classes-icon.png";
 import cultivationIcon from "@assets/cultivation-icon.png";
 import homeIcon from "@assets/home-icon.png";
+import petsIcon from "@assets/pets-icon.png";
+import dungeonsIcon from "@assets/dungeons-icon.png";
+import pvpIcon from "@assets/pvp-icon.png";
+import eventsIcon from "@assets/events-icon.png";
+import guidesIcon from "@assets/guides-icon.png";
+import updatesIcon from "@assets/updates-icon.png";
 
 type Category = {
   id: string;
   name: string;
   slug: string;
-  icon?: React.ElementType;
+  icon?: ElementType;
   iconSrc?: string;
   description: string;
 };
@@ -21,14 +27,39 @@ export const CATEGORIES: Category[] = [
   { id: "classes", name: "Classes e Caminhos", slug: "classes", iconSrc: classesIcon, description: "Especializações, elementos e habilidades" },
   { id: "equipment", name: "Equipamentos", slug: "equipment", iconSrc: equipmentIcon, description: "Armas, artefatos e refinamento" },
   { id: "spirits", name: "Espíritos", slug: "spirits", iconSrc: spiritsIcon, description: "Espíritos elementais e aliados sobrenaturais" },
-  { id: "pets", name: "Pets e Companheiros", slug: "pets", icon: Dog, description: "Bestas espirituais e montarias" },
+  { id: "pets", name: "Pets e Companheiros", slug: "pets", iconSrc: petsIcon, description: "Bestas espirituais e montarias" },
   { id: "home", name: "Lar", slug: "home", iconSrc: homeIcon, description: "Página principal da wiki" },
-  { id: "dungeons", name: "Dungeons e Bosses", slug: "dungeons", icon: Skull, description: "Bosses mundiais e instâncias" },
-  { id: "pvp", name: "PvP e Guildas", slug: "pvp", icon: Crosshair, description: "Arena, clãs e rankings" },
-  { id: "guides", name: "Guias", slug: "guides", icon: Map, description: "Guias para iniciantes e progressão" },
-  { id: "events", name: "Eventos", slug: "events", icon: CalendarDays, description: "Eventos sazonais e missões especiais" },
-  { id: "updates", name: "Atualizações", slug: "updates", icon: History, description: "Notas de atualização e roadmap" },
+  { id: "dungeons", name: "Dungeons e Bosses", slug: "dungeons", iconSrc: dungeonsIcon, description: "Bosses mundiais e instâncias" },
+  { id: "pvp", name: "PvP e Guildas", slug: "pvp", iconSrc: pvpIcon, description: "Arena, clãs e rankings" },
+  { id: "guides", name: "Guias", slug: "guides", iconSrc: guidesIcon, description: "Guias para iniciantes e progressão" },
+  { id: "events", name: "Eventos", slug: "events", iconSrc: eventsIcon, description: "Eventos sazonais e missões especiais" },
+  { id: "updates", name: "Atualizações", slug: "updates", iconSrc: updatesIcon, description: "Notas de atualização e roadmap" },
 ];
+
+export function CategoryIcon({
+  category,
+  className = "w-8 h-8",
+  lucideClassName = "w-4 h-4 text-primary",
+}: {
+  category: Category;
+  className?: string;
+  lucideClassName?: string;
+}) {
+  if (category.iconSrc) {
+    return (
+      <img
+        src={category.iconSrc}
+        alt={category.name}
+        className={`object-contain ${className}`}
+      />
+    );
+  }
+  if (category.icon) {
+    const Icon = category.icon;
+    return <Icon className={lucideClassName} />;
+  }
+  return null;
+}
 
 export function Sidebar() {
   const { data: serverCategories } = useListCategories({
@@ -41,7 +72,6 @@ export function Sidebar() {
         <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider mb-4 px-2">Categorias</h3>
         <nav className="space-y-1">
           {CATEGORIES.map((cat) => {
-            const Icon = cat.icon;
             const serverCat = serverCategories?.find(c => c.slug === cat.slug);
             const count = serverCat?.articleCount || 0;
             return (
@@ -51,15 +81,13 @@ export function Sidebar() {
                 className="flex items-center justify-between px-3 py-2 rounded-md hover:bg-primary/10 hover:text-primary text-sm font-medium transition-colors group"
               >
                 <div className="flex items-center gap-3">
-                  {cat.iconSrc ? (
-                    <img
-                      src={cat.iconSrc}
-                      alt={cat.name}
-                      className="w-8 h-8 object-contain group-hover:scale-110 transition-transform"
+                  <span className="group-hover:scale-110 transition-transform inline-flex">
+                    <CategoryIcon
+                      category={cat}
+                      className="w-8 h-8"
+                      lucideClassName="w-4 h-4 text-primary"
                     />
-                  ) : Icon ? (
-                    <Icon className="w-4 h-4 text-primary group-hover:scale-110 transition-transform" />
-                  ) : null}
+                  </span>
                   {cat.name}
                 </div>
                 {count > 0 && (

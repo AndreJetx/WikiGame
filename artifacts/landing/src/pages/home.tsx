@@ -78,10 +78,15 @@ function HeroSection() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, delay: 0.2 }}
         >
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-b from-primary via-yellow-200 to-primary drop-shadow-[0_0_15px_rgba(212,160,23,0.5)] mb-4 tracking-wider uppercase">
-            Legend of Elements
+          <h1 className="mb-6 flex flex-col items-center leading-none">
+            <span className="font-serif text-sm sm:text-base md:text-lg tracking-[0.45em] uppercase text-foreground/90 mb-1 md:mb-2 drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">
+              Legend of
+            </span>
+            <span className="font-mitshuka text-6xl sm:text-7xl md:text-8xl lg:text-9xl text-foreground drop-shadow-[0_8px_24px_rgba(0,0,0,0.65)] [text-shadow:0_0_28px_rgba(212,160,23,0.35)]">
+              Elements
+            </span>
           </h1>
-          <p className="text-xl md:text-3xl font-light text-foreground/90 mb-12 tracking-widest font-serif">
+          <p className="text-xl md:text-3xl font-light text-foreground/90 mb-12 tracking-[0.2em] font-serif">
             A Jornada Rumo à Imortalidade
           </p>
 

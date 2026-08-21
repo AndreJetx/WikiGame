@@ -19,10 +19,11 @@ import {
   List, ListOrdered, Quote, Code, Minus,
   AlignLeft, AlignCenter, AlignRight,
   ImageIcon, Video, Link2, Table2,
-  Undo, Redo, Trash2
+  Undo, Redo, Trash2, Loader2
 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { uploadImageToCloudinary, isCloudinaryConfigured } from "@/lib/cloudinary";
 
 interface RichEditorProps {
   value: string;
@@ -59,6 +60,9 @@ export function RichEditor({ value, onChange, placeholder }: RichEditorProps) {
   const [imageUrl, setImageUrl] = useState("");
   const [videoUrl, setVideoUrl] = useState("");
   const [linkUrl, setLinkUrl] = useState("");
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const isProgrammaticUpdate = useRef(false);
 
   const editor = useEditor({
@@ -102,6 +106,21 @@ export function RichEditor({ value, onChange, placeholder }: RichEditorProps) {
     if (imageUrl.trim()) {
       editor.chain().focus().setImage({ src: imageUrl.trim() }).run();
       setImageUrl("");
+    }
+  };
+
+  const uploadAndInsertImage = async (file: File | undefined) => {
+    if (!file || !editor) return;
+    setUploadError(null);
+    setUploadingImage(true);
+    try {
+      const url = await uploadImageToCloudinary(file, "wiki-articles/content");
+      editor.chain().focus().setImage({ src: url }).run();
+    } catch (e) {
+      setUploadError(e instanceof Error ? e.message : "Erro no upload");
+    } finally {
+      setUploadingImage(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
 
@@ -158,8 +177,40 @@ export function RichEditor({ value, onChange, placeholder }: RichEditorProps) {
           </PopoverTrigger>
           <PopoverContent className="w-80 p-3 space-y-2">
             <p className="text-sm font-medium">Inserir imagem ou GIF</p>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*,image/gif"
+              className="hidden"
+              onChange={(e) => uploadAndInsertImage(e.target.files?.[0])}
+            />
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              className="w-full"
+              disabled={uploadingImage || !isCloudinaryConfigured()}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              {uploadingImage ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Enviando...
+                </>
+              ) : (
+                "Upload Cloudinary"
+              )}
+            </Button>
+            {!isCloudinaryConfigured() && (
+              <p className="text-xs text-muted-foreground">Configure VITE_CLOUDINARY_* no .env</p>
+            )}
+            {uploadError && <p className="text-xs text-destructive">{uploadError}</p>}
+            <div className="relative py-1">
+              <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-border" /></div>
+              <div className="relative flex justify-center text-xs"><span className="bg-popover px-2 text-muted-foreground">ou URL</span></div>
+            </div>
             <Input placeholder="https://..." value={imageUrl} onChange={e => setImageUrl(e.target.value)} onKeyDown={e => e.key === "Enter" && insertImage()} />
-            <Button size="sm" onClick={insertImage} className="w-full">Inserir</Button>
+            <Button size="sm" onClick={insertImage} className="w-full">Inserir URL</Button>
           </PopoverContent>
         </Popover>
         <Popover>
