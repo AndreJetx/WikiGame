@@ -48,9 +48,14 @@ export function Home() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
             >
-              <Link href="/wiki/cultivation" className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-6 py-3 rounded-lg font-medium hover:bg-primary/90 transition-colors">
+              <a
+                href="https://elementsh5.joynetgame.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-6 py-3 rounded-lg font-medium hover:bg-primary/90 transition-colors"
+              >
                 Iniciar Jornada <ArrowRight className="w-4 h-4" />
-              </Link>
+              </a>
             </motion.div>
           </div>
         </section>

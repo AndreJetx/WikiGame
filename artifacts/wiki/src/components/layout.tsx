@@ -44,17 +44,35 @@ export function SpiritualBackground() {
   );
 }
 
-export function Layout({ children, withSidebar = false }: { children: ReactNode, withSidebar?: boolean }) {
+export function Layout({
+  children,
+  withSidebar = false,
+  hideFooter = false,
+  fullWidth = false,
+}: {
+  children: ReactNode;
+  withSidebar?: boolean;
+  hideFooter?: boolean;
+  fullWidth?: boolean;
+}) {
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground selection:bg-primary/30 relative">
       <SpiritualBackground />
       <Navbar />
-      <main className="flex-1 flex w-full max-w-screen-2xl mx-auto">
+      <main
+        className={
+          fullWidth
+            ? "flex-1 flex w-full"
+            : "flex-1 flex w-full max-w-screen-2xl mx-auto"
+        }
+      >
         {children}
       </main>
-      <footer className="border-t border-border py-8 text-center text-sm text-muted-foreground mt-auto relative z-10 bg-background/80 backdrop-blur-sm">
-        <p>Legend of Elements Wiki &copy; 2025. This is a mystical realm.</p>
-      </footer>
+      {!hideFooter && (
+        <footer className="border-t border-border py-8 text-center text-sm text-muted-foreground mt-auto relative z-10 bg-background/80 backdrop-blur-sm">
+          <p>Legend of Elements Wiki &copy; 2025. This is a mystical realm.</p>
+        </footer>
+      )}
     </div>
   );
 }
