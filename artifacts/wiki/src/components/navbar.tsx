@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { Search, Moon, Sun, Shield } from "lucide-react";
+import { Search, Moon, Sun } from "lucide-react";
 import { useTheme } from "./theme-provider";
 import { Button } from "./ui/button";
 
@@ -16,7 +16,7 @@ export function Navbar() {
             </span>
           </Link>
         </div>
-        
+
         <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
           <div className="w-full flex-1 md:w-auto md:flex-none">
             <Link href="/search">
@@ -36,12 +36,6 @@ export function Navbar() {
               <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
               <span className="sr-only">Alternar tema</span>
             </Button>
-            <Link href="/admin">
-              <Button variant="ghost" size="icon">
-                <Shield className="h-5 w-5" />
-                <span className="sr-only">Administrador</span>
-              </Button>
-            </Link>
           </nav>
         </div>
       </div>

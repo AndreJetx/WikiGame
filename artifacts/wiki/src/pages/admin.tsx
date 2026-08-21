@@ -1,8 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Layout } from "@/components/layout";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useListArticles, useCreateArticle, useUpdateArticle, useDeleteArticle, getListArticlesQueryKey } from "@workspace/api-client-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -17,58 +16,10 @@ import { ImageUploadField } from "@/components/image-upload-field";
 import { Edit, Trash, Plus } from "lucide-react";
 
 export function Admin() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [password, setPassword] = useState("");
-  const { toast } = useToast();
-
-  useEffect(() => {
-    if (localStorage.getItem("adminAuth") === "true") {
-      setIsAuthenticated(true);
-    }
-  }, []);
-
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (password === "admin123") {
-      localStorage.setItem("adminAuth", "true");
-      setIsAuthenticated(true);
-      toast({ title: "Acesso concedido", description: "Bem-vindo aos arquivos, Administrador." });
-    } else {
-      toast({ title: "Acesso negado", description: "Senha incorreta.", variant: "destructive" });
-    }
-  };
-
-  if (!isAuthenticated) {
-    return (
-      <Layout>
-        <div className="flex-1 flex items-center justify-center p-4">
-          <Card className="w-full max-w-md bg-card/80 backdrop-blur border-primary/20 shadow-2xl shadow-primary/10">
-            <CardHeader className="text-center">
-              <CardTitle className="text-3xl font-serif text-primary">Acesso Restrito</CardTitle>
-              <p className="text-muted-foreground mt-2">Apenas os anciãos reconhecidos da seita podem prosseguir.</p>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleLogin} className="space-y-4">
-                <Input 
-                  type="password" 
-                  placeholder="Digite a senha..." 
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  className="bg-background/50 text-center text-lg tracking-widest"
-                />
-                <Button type="submit" className="w-full text-lg h-12">Entrar nos Arquivos</Button>
-              </form>
-            </CardContent>
-          </Card>
-        </div>
-      </Layout>
-    );
-  }
-
-  return <AdminDashboard />;
+  return <GerenciamentoArtigos />;
 }
 
-function AdminDashboard() {
+function GerenciamentoArtigos() {
   const queryClient = useQueryClient();
   const { data: articles, isLoading } = useListArticles({ limit: 100 });
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -151,7 +102,7 @@ function AdminDashboard() {
       <div className="flex-1 p-4 md:p-8 w-full max-w-6xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl font-serif font-bold text-primary">Arquivos da Seita</h1>
+            <h1 className="text-3xl font-serif font-bold text-primary">Gerenciamento de Artigos</h1>
             <p className="text-muted-foreground">Gerencie o conhecimento dos reinos.</p>
           </div>
           <Dialog open={isDialogOpen} onOpenChange={(open) => { setIsDialogOpen(open); if(!open) resetForm(); }}>

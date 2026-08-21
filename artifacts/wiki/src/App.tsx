@@ -20,7 +20,10 @@ function Router() {
         <Redirect to="/" />
       </Route>
       <Route path="/search" component={Search} />
-      <Route path="/admin" component={Admin} />
+      <Route path="/gerenciamentoartigos" component={Admin} />
+      <Route path="/admin">
+        <Redirect to="/gerenciamentoartigos" />
+      </Route>
       <Route path="/wiki/:category/:slug" component={Article} />
       <Route path="/wiki/:category" component={Category} />
       <Route component={NotFound} />
