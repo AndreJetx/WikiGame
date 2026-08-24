@@ -39,6 +39,26 @@ function GerenciamentoArtigos() {
     setEditingSlug(null);
   };
 
+  const closeDialog = () => {
+    setIsDialogOpen(false);
+    resetForm();
+  };
+
+  const requestCloseDialog = () => {
+    const ok = window.confirm(
+      "Descartar as alterações? O conteúdo não salvo será perdido.",
+    );
+    if (ok) closeDialog();
+  };
+
+  const handleDialogOpenChange = (open: boolean) => {
+    if (open) {
+      setIsDialogOpen(true);
+      return;
+    }
+    requestCloseDialog();
+  };
+
   const openEdit = (article: any) => {
     setFormData({
       title: article.title,
@@ -82,7 +102,7 @@ function GerenciamentoArtigos() {
       updateMutation.mutate({ slug: editingSlug, data: payload }, {
         onSuccess: () => {
           queryClient.invalidateQueries({ queryKey: getListArticlesQueryKey() });
-          setIsDialogOpen(false);
+          closeDialog();
           toast({ title: "Artigo atualizado" });
         }
       });
@@ -90,7 +110,7 @@ function GerenciamentoArtigos() {
       createMutation.mutate({ data: payload }, {
         onSuccess: () => {
           queryClient.invalidateQueries({ queryKey: getListArticlesQueryKey() });
-          setIsDialogOpen(false);
+          closeDialog();
           toast({ title: "Artigo criado" });
         }
       });
@@ -105,11 +125,16 @@ function GerenciamentoArtigos() {
             <h1 className="text-3xl font-serif font-bold text-primary">Gerenciamento de Artigos</h1>
             <p className="text-muted-foreground">Gerencie o conhecimento dos reinos.</p>
           </div>
-          <Dialog open={isDialogOpen} onOpenChange={(open) => { setIsDialogOpen(open); if(!open) resetForm(); }}>
+          <Dialog open={isDialogOpen} onOpenChange={handleDialogOpenChange}>
             <DialogTrigger asChild>
               <Button onClick={resetForm} className="gap-2"><Plus className="w-4 h-4" /> Criar Novo Artigo</Button>
             </DialogTrigger>
-            <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto bg-card border-primary/20">
+            <DialogContent
+              className="max-w-3xl max-h-[90vh] overflow-y-auto bg-card border-primary/20"
+              onPointerDownOutside={(e) => e.preventDefault()}
+              onInteractOutside={(e) => e.preventDefault()}
+              onEscapeKeyDown={(e) => e.preventDefault()}
+            >
               <DialogHeader>
                 <DialogTitle className="text-2xl font-serif text-primary">{editingSlug ? "Editar Artigo" : "Criar Novo Artigo"}</DialogTitle>
               </DialogHeader>
@@ -165,7 +190,10 @@ function GerenciamentoArtigos() {
                     </label>
                   </div>
                 </div>
-                <div className="flex justify-end pt-4">
+                <div className="flex justify-end gap-2 pt-4">
+                  <Button type="button" variant="outline" onClick={requestCloseDialog}>
+                    Cancelar
+                  </Button>
                   <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
                     {editingSlug ? "Salvar Alterações" : "Publicar Artigo"}
                   </Button>
