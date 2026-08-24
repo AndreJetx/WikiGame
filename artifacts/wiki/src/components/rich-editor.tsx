@@ -13,13 +13,18 @@ import Placeholder from "@tiptap/extension-placeholder";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Bold, Italic, UnderlineIcon, Strikethrough,
   Heading1, Heading2, Heading3,
   List, ListOrdered, Quote, Code, Minus,
   AlignLeft, AlignCenter, AlignRight,
+  AlignVerticalJustifyStart, AlignVerticalJustifyCenter, AlignVerticalJustifyEnd,
   ImageIcon, Video, Link2, Table2,
-  Undo, Redo, Trash2, Loader2
+  Undo, Redo, Trash2, Loader2,
+  BetweenHorizontalStart, BetweenHorizontalEnd,
+  BetweenVerticalStart, BetweenVerticalEnd,
+  Rows3, Columns3,
 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
@@ -31,19 +36,73 @@ interface RichEditorProps {
   placeholder?: string;
 }
 
-function ToolbarButton({ onClick, active, children, title }: {
+const TABLE_GRID_MAX = 8;
+
+const cellExtraAttributes = {
+  verticalAlign: {
+    default: null as string | null,
+    parseHTML: (element: HTMLElement) => element.style.verticalAlign || null,
+    renderHTML: (attributes: { verticalAlign?: string | null }) => {
+      if (!attributes.verticalAlign) return {};
+      return { style: `vertical-align: ${attributes.verticalAlign}` };
+    },
+  },
+};
+
+const ResizableTableRow = TableRow.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      height: {
+        default: null,
+        parseHTML: (element: HTMLElement) => {
+          const raw = element.style.height || element.getAttribute("height");
+          if (!raw) return null;
+          const value = parseInt(raw, 10);
+          return Number.isFinite(value) ? value : null;
+        },
+        renderHTML: (attributes: { height?: number | null }) => {
+          if (!attributes.height) return {};
+          return { style: `height: ${attributes.height}px` };
+        },
+      },
+    };
+  },
+});
+
+const AlignedTableCell = TableCell.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      ...cellExtraAttributes,
+    };
+  },
+});
+
+const AlignedTableHeader = TableHeader.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      ...cellExtraAttributes,
+    };
+  },
+});
+
+function ToolbarButton({ onClick, active, children, title, disabled }: {
   onClick: () => void;
   active?: boolean;
   children: React.ReactNode;
   title?: string;
+  disabled?: boolean;
 }) {
   return (
     <button
       type="button"
       title={title}
+      disabled={disabled}
       onClick={onClick}
       className={cn(
-        "p-1.5 rounded hover:bg-primary/20 transition-colors",
+        "p-1.5 rounded hover:bg-primary/20 transition-colors disabled:opacity-40 disabled:pointer-events-none",
         active ? "bg-primary/30 text-primary" : "text-muted-foreground hover:text-foreground"
       )}
     >
@@ -56,27 +115,148 @@ function Divider() {
   return <div className="w-px h-5 bg-border mx-0.5 self-center" />;
 }
 
+function TableSizePicker({
+  onInsert,
+}: {
+  onInsert: (rows: number, cols: number, withHeaderRow: boolean) => void;
+}) {
+  const [hover, setHover] = useState({ rows: 3, cols: 3 });
+  const [withHeaderRow, setWithHeaderRow] = useState(true);
+  const [customRows, setCustomRows] = useState("3");
+  const [customCols, setCustomCols] = useState("3");
+
+  const insertCustom = () => {
+    const rows = Math.min(20, Math.max(1, parseInt(customRows, 10) || 1));
+    const cols = Math.min(20, Math.max(1, parseInt(customCols, 10) || 1));
+    onInsert(rows, cols, withHeaderRow);
+  };
+
+  return (
+    <div className="space-y-3">
+      <p className="text-sm font-medium">Inserir tabela</p>
+      <div
+        className="grid gap-0.5 w-fit mx-auto"
+        style={{ gridTemplateColumns: `repeat(${TABLE_GRID_MAX}, 1.15rem)` }}
+        onMouseLeave={() => setHover({ rows: 3, cols: 3 })}
+      >
+        {Array.from({ length: TABLE_GRID_MAX * TABLE_GRID_MAX }, (_, index) => {
+          const row = Math.floor(index / TABLE_GRID_MAX) + 1;
+          const col = (index % TABLE_GRID_MAX) + 1;
+          const active = row <= hover.rows && col <= hover.cols;
+          return (
+            <button
+              key={index}
+              type="button"
+              aria-label={`${row} por ${col}`}
+              className={cn(
+                "w-4 h-4 border rounded-[2px] transition-colors",
+                active ? "bg-primary border-primary" : "bg-background border-border hover:border-primary/60"
+              )}
+              onMouseEnter={() => setHover({ rows: row, cols: col })}
+              onClick={() => onInsert(row, col, withHeaderRow)}
+            />
+          );
+        })}
+      </div>
+      <p className="text-xs text-muted-foreground text-center tabular-nums">
+        {hover.rows} × {hover.cols} {hover.rows === 1 ? "linha" : "linhas"}
+      </p>
+      <div className="flex items-center gap-2">
+        <Checkbox
+          id="table-header-row"
+          checked={withHeaderRow}
+          onCheckedChange={(checked) => setWithHeaderRow(!!checked)}
+        />
+        <label htmlFor="table-header-row" className="text-xs cursor-pointer">
+          Linha de cabeçalho
+        </label>
+      </div>
+      <div className="relative py-1">
+        <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-border" /></div>
+        <div className="relative flex justify-center text-xs"><span className="bg-popover px-2 text-muted-foreground">ou tamanho exato</span></div>
+      </div>
+      <div className="flex items-end gap-2">
+        <div className="flex-1 space-y-1">
+          <label className="text-[11px] text-muted-foreground">Linhas</label>
+          <Input
+            type="number"
+            min={1}
+            max={20}
+            value={customRows}
+            onChange={(e) => setCustomRows(e.target.value)}
+            className="h-8"
+          />
+        </div>
+        <div className="flex-1 space-y-1">
+          <label className="text-[11px] text-muted-foreground">Colunas</label>
+          <Input
+            type="number"
+            min={1}
+            max={20}
+            value={customCols}
+            onChange={(e) => setCustomCols(e.target.value)}
+            className="h-8"
+          />
+        </div>
+        <Button type="button" size="sm" className="h-8" onClick={insertCustom}>
+          Inserir
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function findTableCell(target: EventTarget | null): HTMLElement | null {
+  if (!(target instanceof Element)) return null;
+  return target.closest("td, th");
+}
+
+function updateRowHeightFromCell(view: { posAtDOM: (node: Node, offset: number) => number; state: any; dispatch: (tr: any) => void }, cell: HTMLElement, height: number) {
+  const pos = view.posAtDOM(cell, 0);
+  const $pos = view.state.doc.resolve(pos);
+  for (let depth = $pos.depth; depth > 0; depth--) {
+    if ($pos.node(depth).type.name === "tableRow") {
+      const from = $pos.before(depth);
+      const node = $pos.node(depth);
+      view.dispatch(view.state.tr.setNodeMarkup(from, undefined, { ...node.attrs, height }));
+      return;
+    }
+  }
+}
+
 export function RichEditor({ value, onChange, placeholder }: RichEditorProps) {
   const [imageUrl, setImageUrl] = useState("");
   const [videoUrl, setVideoUrl] = useState("");
   const [linkUrl, setLinkUrl] = useState("");
   const [uploadingImage, setUploadingImage] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [tableMenuOpen, setTableMenuOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const isProgrammaticUpdate = useRef(false);
+  const rowResizeRef = useRef<{
+    startY: number;
+    startHeight: number;
+    cell: HTMLElement;
+  } | null>(null);
 
   const editor = useEditor({
     extensions: [
       StarterKit,
       Underline,
       Image.configure({ allowBase64: true, HTMLAttributes: { class: "rounded-lg max-w-full my-4" } }),
-      Table.configure({ resizable: true, HTMLAttributes: { class: "border-collapse w-full" } }),
-      TableRow,
-      TableHeader,
-      TableCell,
+      Table.configure({
+        resizable: true,
+        lastColumnResizable: true,
+        handleWidth: 8,
+        cellMinWidth: 48,
+        HTMLAttributes: { class: "wiki-table" },
+      }),
+      ResizableTableRow,
+      AlignedTableHeader,
+      AlignedTableCell,
       Youtube.configure({ width: 640, height: 360, HTMLAttributes: { class: "w-full aspect-video rounded-lg my-4" } }),
       Link.configure({ openOnClick: false, HTMLAttributes: { class: "text-primary underline" } }),
-      TextAlign.configure({ types: ["heading", "paragraph"] }),
+      TextAlign.configure({ types: ["heading", "paragraph", "tableCell", "tableHeader"] }),
       Placeholder.configure({ placeholder: placeholder || "Escreva o conteúdo do artigo..." }),
     ],
     content: value,
@@ -88,7 +268,54 @@ export function RichEditor({ value, onChange, placeholder }: RichEditorProps) {
     editorProps: {
       attributes: {
         class: "prose prose-stone dark:prose-invert prose-headings:font-serif prose-h1:text-primary max-w-none min-h-[300px] p-4 focus:outline-none"
-      }
+      },
+      handleDOMEvents: {
+        mousemove(view, event) {
+          const mouseEvent = event as MouseEvent;
+          const cell = findTableCell(mouseEvent.target);
+          view.dom.querySelectorAll(".row-resize-hover").forEach((el) => el.classList.remove("row-resize-hover"));
+          if (!cell || rowResizeRef.current) return false;
+          const rect = cell.getBoundingClientRect();
+          const nearBottom = mouseEvent.clientY >= rect.bottom - 6 && mouseEvent.clientY <= rect.bottom + 4;
+          const nearRight = mouseEvent.clientX >= rect.right - 8;
+          if (nearBottom && !nearRight) {
+            cell.classList.add("row-resize-hover");
+            view.dom.classList.add("row-resize-cursor");
+          } else {
+            view.dom.classList.remove("row-resize-cursor");
+          }
+          return false;
+        },
+        mousedown(view, event) {
+          const mouseEvent = event as MouseEvent;
+          if (!view.dom.classList.contains("row-resize-cursor")) return false;
+          const cell = findTableCell(mouseEvent.target);
+          if (!cell) return false;
+          mouseEvent.preventDefault();
+          const startHeight = cell.parentElement?.getBoundingClientRect().height ?? cell.getBoundingClientRect().height;
+          rowResizeRef.current = { startY: mouseEvent.clientY, startHeight, cell };
+          const onMove = (moveEvent: MouseEvent) => {
+            const current = rowResizeRef.current;
+            if (!current) return;
+            const height = Math.max(28, current.startHeight + (moveEvent.clientY - current.startY));
+            const row = current.cell.parentElement;
+            if (row) row.style.height = `${height}px`;
+          };
+          const onUp = (upEvent: MouseEvent) => {
+            document.removeEventListener("mousemove", onMove);
+            document.removeEventListener("mouseup", onUp);
+            const current = rowResizeRef.current;
+            rowResizeRef.current = null;
+            view.dom.classList.remove("row-resize-cursor");
+            if (!current) return;
+            const height = Math.max(28, current.startHeight + (upEvent.clientY - current.startY));
+            updateRowHeightFromCell(view, current.cell, height);
+          };
+          document.addEventListener("mousemove", onMove);
+          document.addEventListener("mouseup", onUp);
+          return true;
+        },
+      },
     }
   });
 
@@ -140,9 +367,24 @@ export function RichEditor({ value, onChange, placeholder }: RichEditorProps) {
     }
   };
 
-  const insertTable = () => {
-    editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
+  const insertTable = (rows: number, cols: number, withHeaderRow: boolean) => {
+    setTableMenuOpen(false);
+    requestAnimationFrame(() => {
+      editor.chain().focus().insertTable({ rows, cols, withHeaderRow }).run();
+    });
   };
+
+  const setCellVerticalAlign = (verticalAlign: string) => {
+    editor.chain().focus()
+      .updateAttributes("tableCell", { verticalAlign })
+      .updateAttributes("tableHeader", { verticalAlign })
+      .run();
+  };
+
+  const inTable = editor.isActive("table");
+  const cellVerticalAlign = (editor.getAttributes("tableCell").verticalAlign
+    || editor.getAttributes("tableHeader").verticalAlign
+    || "top") as string;
 
   return (
     <div className="border border-border rounded-lg overflow-hidden bg-background/50">
@@ -240,14 +482,66 @@ export function RichEditor({ value, onChange, placeholder }: RichEditorProps) {
             </div>
           </PopoverContent>
         </Popover>
-        <ToolbarButton onClick={insertTable} title="Insert table"><Table2 className="w-4 h-4" /></ToolbarButton>
-        {editor.isActive("table") && (
-          <ToolbarButton onClick={() => editor.chain().focus().deleteTable().run()} title="Delete table">
-            <Trash2 className="w-4 h-4 text-destructive" />
-          </ToolbarButton>
+        <Popover open={tableMenuOpen} onOpenChange={setTableMenuOpen}>
+          <PopoverTrigger asChild>
+            <button
+              type="button"
+              title="Inserir tabela"
+              className={cn(
+                "p-1.5 rounded hover:bg-primary/20 transition-colors",
+                inTable || tableMenuOpen ? "bg-primary/30 text-primary" : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              <Table2 className="w-4 h-4" />
+            </button>
+          </PopoverTrigger>
+          <PopoverContent className="w-72 p-3" align="start">
+            <TableSizePicker onInsert={insertTable} />
+          </PopoverContent>
+        </Popover>
+        {inTable && (
+          <>
+            <Divider />
+            <ToolbarButton onClick={() => editor.chain().focus().addRowBefore().run()} title="Inserir linha acima">
+              <BetweenHorizontalStart className="w-4 h-4" />
+            </ToolbarButton>
+            <ToolbarButton onClick={() => editor.chain().focus().addRowAfter().run()} title="Inserir linha abaixo">
+              <BetweenHorizontalEnd className="w-4 h-4" />
+            </ToolbarButton>
+            <ToolbarButton onClick={() => editor.chain().focus().deleteRow().run()} title="Excluir linha">
+              <Rows3 className="w-4 h-4" />
+            </ToolbarButton>
+            <ToolbarButton onClick={() => editor.chain().focus().addColumnBefore().run()} title="Inserir coluna à esquerda">
+              <BetweenVerticalStart className="w-4 h-4" />
+            </ToolbarButton>
+            <ToolbarButton onClick={() => editor.chain().focus().addColumnAfter().run()} title="Inserir coluna à direita">
+              <BetweenVerticalEnd className="w-4 h-4" />
+            </ToolbarButton>
+            <ToolbarButton onClick={() => editor.chain().focus().deleteColumn().run()} title="Excluir coluna">
+              <Columns3 className="w-4 h-4" />
+            </ToolbarButton>
+            <Divider />
+            <ToolbarButton onClick={() => setCellVerticalAlign("top")} active={cellVerticalAlign === "top"} title="Alinhar ao topo">
+              <AlignVerticalJustifyStart className="w-4 h-4" />
+            </ToolbarButton>
+            <ToolbarButton onClick={() => setCellVerticalAlign("middle")} active={cellVerticalAlign === "middle"} title="Centralizar verticalmente">
+              <AlignVerticalJustifyCenter className="w-4 h-4" />
+            </ToolbarButton>
+            <ToolbarButton onClick={() => setCellVerticalAlign("bottom")} active={cellVerticalAlign === "bottom"} title="Alinhar à base">
+              <AlignVerticalJustifyEnd className="w-4 h-4" />
+            </ToolbarButton>
+            <ToolbarButton onClick={() => editor.chain().focus().deleteTable().run()} title="Excluir tabela">
+              <Trash2 className="w-4 h-4 text-destructive" />
+            </ToolbarButton>
+          </>
         )}
       </div>
       <EditorContent editor={editor} />
+      {inTable && (
+        <p className="px-3 py-1.5 text-[11px] text-muted-foreground border-t border-border bg-muted/20">
+          Arraste a borda direita da célula para a largura da coluna, e a borda inferior para a altura da linha.
+        </p>
+      )}
     </div>
   );
 }

@@ -293,20 +293,27 @@
   margin: 1em 0;
   border: none;
 }
-.tiptap-content table {
+.tiptap-content table,
+.tiptap-content .wiki-table {
   width: 100%;
   border-collapse: collapse;
+  table-layout: fixed;
   margin: 1.5em 0;
 }
 .tiptap-content th,
 .tiptap-content td {
   border: 1px solid hsl(var(--border));
   padding: 0.5em 0.75em;
-  text-align: left;
+  box-sizing: border-box;
+  word-break: break-word;
+  vertical-align: top;
 }
 .tiptap-content th {
   background: hsl(var(--muted) / 0.5);
   font-weight: 600;
+}
+.tiptap-content .tableWrapper {
+  overflow-x: auto;
 }
 .tiptap-content a {
   color: hsl(var(--primary));
@@ -328,19 +335,35 @@
 }
 
 /* TipTap editor table styles */
-.tiptap table {
-  border-collapse: collapse;
-  width: 100%;
+.tiptap .tableWrapper {
+  overflow-x: auto;
   margin: 0.75em 0;
 }
-.tiptap th, .tiptap td {
+.tiptap table,
+.tiptap .wiki-table {
+  border-collapse: collapse;
+  table-layout: fixed;
+  width: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+.tiptap th,
+.tiptap td {
   border: 1px solid hsl(var(--border));
+  box-sizing: border-box;
+  min-width: 48px;
   padding: 0.4em 0.6em;
-  min-width: 80px;
+  position: relative;
+  vertical-align: top;
 }
 .tiptap th {
   background: hsl(var(--muted) / 0.5);
   font-weight: 600;
+}
+.tiptap td > *,
+.tiptap th > * {
+  margin-top: 0;
+  margin-bottom: 0;
 }
 .tiptap .selectedCell:after {
   background: hsl(var(--primary) / 0.15);
@@ -362,5 +385,23 @@
   right: -2px;
   top: 0;
   width: 4px;
+  z-index: 20;
 }
-.tiptap.resize-cursor { cursor: col-resize; }
+.tiptap td.row-resize-hover::before,
+.tiptap th.row-resize-hover::before {
+  background-color: hsl(var(--primary));
+  content: "";
+  height: 4px;
+  left: 0;
+  pointer-events: none;
+  position: absolute;
+  right: 0;
+  bottom: -2px;
+  z-index: 20;
+}
+.tiptap.resize-cursor {
+  cursor: col-resize;
+}
+.tiptap.row-resize-cursor {
+  cursor: row-resize;
+}
