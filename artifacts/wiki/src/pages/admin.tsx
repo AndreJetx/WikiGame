@@ -13,7 +13,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { RichEditor } from "@/components/rich-editor";
 import { useQueryClient } from "@tanstack/react-query";
 import { ImageUploadField } from "@/components/image-upload-field";
-import { Edit, Trash, Plus } from "lucide-react";
+import { Edit, Trash, Plus, Search } from "lucide-react";
 
 export function Admin() {
   return <GerenciamentoArtigos />;
@@ -24,6 +24,22 @@ function GerenciamentoArtigos() {
   const { data: articles, isLoading } = useListArticles({ limit: 100 });
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingSlug, setEditingSlug] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const normalizedQuery = searchQuery.trim().toLowerCase();
+  const filteredArticles = (articles ?? []).filter((article) => {
+    if (!normalizedQuery) return true;
+    const haystack = [
+      article.title,
+      article.slug,
+      article.category,
+      article.excerpt,
+      ...(article.tags ?? []),
+    ]
+      .join(" ")
+      .toLowerCase();
+    return haystack.includes(normalizedQuery);
+  });
   
   const createMutation = useCreateArticle();
   const updateMutation = useUpdateArticle();
@@ -203,6 +219,17 @@ function GerenciamentoArtigos() {
           </Dialog>
         </div>
 
+        <div className="relative mb-6">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+          <Input
+            type="search"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Pesquisar por título, slug, categoria ou tag..."
+            className="pl-10 h-11 bg-card/50 border-primary/20 focus-visible:ring-primary"
+          />
+        </div>
+
         <div className="border border-border/50 rounded-xl overflow-hidden bg-card/50">
           <Table>
             <TableHeader className="bg-muted/50">
@@ -217,8 +244,8 @@ function GerenciamentoArtigos() {
             <TableBody>
               {isLoading ? (
                 <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">Consultando os arquivos...</TableCell></TableRow>
-              ) : articles?.length ? (
-                articles.map(article => (
+              ) : filteredArticles.length ? (
+                filteredArticles.map(article => (
                   <TableRow key={article.id}>
                     <TableCell className="font-medium">{article.title}</TableCell>
                     <TableCell><span className="uppercase text-xs font-semibold text-muted-foreground tracking-wider">{article.category}</span></TableCell>
@@ -233,7 +260,11 @@ function GerenciamentoArtigos() {
                   </TableRow>
                 ))
               ) : (
-                <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">Os arquivos estão vazios.</TableCell></TableRow>
+                <TableRow>
+                  <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                    {normalizedQuery ? "Nenhum artigo encontrado para essa pesquisa." : "Os arquivos estão vazios."}
+                  </TableCell>
+                </TableRow>
               )}
             </TableBody>
           </Table>

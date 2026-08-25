@@ -2,18 +2,17 @@ import { Link } from "wouter";
 import { Search, Moon, Sun } from "lucide-react";
 import { useTheme } from "./theme-provider";
 import { Button } from "./ui/button";
+import { WikiLogo } from "./wiki-logo";
 
 export function Navbar() {
   const { theme, setTheme } = useTheme();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 max-w-screen-2xl items-center px-4 md:px-8">
-        <div className="mr-4 hidden md:flex">
-          <Link href="/" className="mr-6 flex items-center space-x-2">
-            <span className="font-serif font-bold text-xl text-primary drop-shadow-sm tracking-wide">
-              Legend of Elements
-            </span>
+      <div className="container flex h-[4.5rem] max-w-screen-2xl items-center px-4 md:px-8">
+        <div className="mr-4 flex min-w-0">
+          <Link href="/" className="mr-4 md:mr-6 flex items-center shrink-0">
+            <WikiLogo />
           </Link>
         </div>
 

@@ -31,7 +31,7 @@ export function Home() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="text-4xl md:text-6xl font-serif font-bold text-white mb-4 drop-shadow-lg"
+              className="text-4xl md:text-6xl font-mitshuka text-white mb-4 drop-shadow-lg"
             >
               O Caminho da Imortalidade
             </motion.h1>
