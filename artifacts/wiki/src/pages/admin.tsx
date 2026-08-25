@@ -101,6 +101,22 @@ function GerenciamentoArtigos() {
     }
   };
 
+  const handleMoveCategory = (slug: string, category: string) => {
+    updateMutation.mutate(
+      { slug, data: { category } },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: getListArticlesQueryKey() });
+          const name = CATEGORIES.find((c) => c.slug === category)?.name ?? category;
+          toast({ title: `Artigo movido para ${name}` });
+        },
+        onError: () => {
+          toast({ title: "Não foi possível mover o artigo", variant: "destructive" });
+        },
+      },
+    );
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const payload = {
@@ -248,7 +264,27 @@ function GerenciamentoArtigos() {
                 filteredArticles.map(article => (
                   <TableRow key={article.id}>
                     <TableCell className="font-medium">{article.title}</TableCell>
-                    <TableCell><span className="uppercase text-xs font-semibold text-muted-foreground tracking-wider">{article.category}</span></TableCell>
+                    <TableCell className="min-w-[220px]">
+                      <Select
+                        value={article.category}
+                        onValueChange={(category) => {
+                          if (category === article.category) return;
+                          handleMoveCategory(article.slug, category);
+                        }}
+                        disabled={updateMutation.isPending && updateMutation.variables?.slug === article.slug}
+                      >
+                        <SelectTrigger className="h-8 w-full max-w-[240px] text-sm">
+                          <SelectValue placeholder={article.category} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {CATEGORIES.map((c) => (
+                            <SelectItem key={c.slug} value={c.slug}>
+                              {c.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </TableCell>
                     <TableCell>{article.viewCount}</TableCell>
                     <TableCell>{new Date(article.createdAt).toLocaleDateString("pt-BR")}</TableCell>
                     <TableCell className="text-right">

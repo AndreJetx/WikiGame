@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { wikiUrl } from "@/lib/wiki-url";
+import footerArt from "@assets/andrjetx-footer.jpg";
 
 // @ts-ignore - Vite handles this import
 import coverImage from "@assets/legend-of-elements-upcoming-launch-cover_1779364693164.jpg";
@@ -331,23 +332,36 @@ function FinalCTA() {
 function Footer() {
   return (
     <footer className="bg-black py-8 border-t border-border/30">
-      <div className="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4">
-        <div className="flex items-center gap-2">
-          <Sparkles className="w-5 h-5 text-primary" />
-          <span className="text-lg font-serif font-bold text-foreground/90">Legend of Elements</span>
+      <div className="container mx-auto px-4 flex flex-col gap-6">
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-5 h-5 text-primary" />
+            <span className="text-lg font-serif font-bold text-foreground/90">Legend of Elements</span>
+          </div>
+          
+          <p className="text-sm text-muted-foreground text-center">
+            &copy; {new Date().getFullYear()} Legend of Elements. Todos os direitos reservados.
+          </p>
+          
+          <div className="flex items-center gap-6 text-sm font-medium">
+            <a href="https://elementsh5.joynetgame.com/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
+              Jogo Oficial
+            </a>
+            <a href={wikiUrl("/")} className="text-muted-foreground hover:text-primary transition-colors">
+              Wiki
+            </a>
+          </div>
         </div>
-        
-        <p className="text-sm text-muted-foreground text-center">
-          &copy; {new Date().getFullYear()} Legend of Elements. Todos os direitos reservados.
-        </p>
-        
-        <div className="flex items-center gap-6 text-sm font-medium">
-          <a href="https://elementsh5.joynetgame.com/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
-            Jogo Oficial
-          </a>
-          <a href={wikiUrl("/")} className="text-muted-foreground hover:text-primary transition-colors">
-            Wiki
-          </a>
+
+        <div className="flex items-center justify-between gap-4 md:gap-8 border-t border-border/20 pt-5">
+          <p className="text-sm text-muted-foreground min-w-0">
+            Feito por AndrJetx — O Free, para jogadores, sem fontes oficiais envolvidas.
+          </p>
+          <img
+            src={footerArt}
+            alt="AndrJetx"
+            className="h-16 sm:h-20 md:h-28 w-auto object-contain rounded-md shrink-0"
+          />
         </div>
       </div>
     </footer>

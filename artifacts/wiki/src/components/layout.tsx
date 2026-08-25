@@ -1,5 +1,6 @@
 import { ReactNode, useEffect, useState } from "react";
 import { Navbar } from "./navbar";
+import footerArt from "@assets/andrjetx-footer.jpg";
 
 export function SpiritualBackground() {
   const [particles, setParticles] = useState<{ id: number; x: number; y: number; size: number; delay: number; duration: number }[]>([]);
@@ -69,8 +70,20 @@ export function Layout({
         {children}
       </main>
       {!hideFooter && (
-        <footer className="border-t border-border py-8 text-center text-sm text-muted-foreground mt-auto relative z-10 bg-background/80 backdrop-blur-sm">
-          <p>Legend of Elements Wiki &copy; 2025. This is a mystical realm.</p>
+        <footer className="border-t border-border py-4 md:py-5 mt-auto relative z-10 bg-background/80 backdrop-blur-sm">
+          <div className="max-w-screen-2xl mx-auto px-4 md:px-8 flex items-center justify-between gap-4 md:gap-8">
+            <div className="text-sm text-muted-foreground min-w-0">
+              <p>Legend of Elements Wiki &copy; {new Date().getFullYear()}</p>
+              <p className="mt-1 text-foreground/85">
+                Feito por AndrJetx — O Free, para jogadores, sem fontes oficiais envolvidas.
+              </p>
+            </div>
+            <img
+              src={footerArt}
+              alt="AndrJetx"
+              className="h-16 sm:h-20 md:h-28 w-auto object-contain rounded-md shrink-0"
+            />
+          </div>
         </footer>
       )}
     </div>
