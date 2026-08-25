@@ -36,6 +36,7 @@ interface RichEditorProps {
   value: string;
   onChange: (html: string) => void;
   placeholder?: string;
+  className?: string;
 }
 
 const TABLE_GRID_MAX = 8;
@@ -338,7 +339,7 @@ function updateRowHeightFromCell(view: { posAtDOM: (node: Node, offset: number) 
   }
 }
 
-export function RichEditor({ value, onChange, placeholder }: RichEditorProps) {
+export function RichEditor({ value, onChange, placeholder, className }: RichEditorProps) {
   const [imageUrl, setImageUrl] = useState("");
   const [videoUrl, setVideoUrl] = useState("");
   const [linkUrl, setLinkUrl] = useState("");
@@ -510,8 +511,8 @@ export function RichEditor({ value, onChange, placeholder }: RichEditorProps) {
     || "top") as string;
 
   return (
-    <div className="border border-border rounded-lg overflow-hidden bg-background/50">
-      <div className="flex flex-wrap items-center gap-0.5 p-2 border-b border-border bg-muted/30 sticky top-0 z-10">
+    <div className={cn("rounded-lg border border-border bg-background/50", className)}>
+      <div className="sticky top-0 z-20 flex flex-wrap items-center gap-0.5 border-b border-border bg-muted/95 p-2 pr-12 backdrop-blur supports-[backdrop-filter]:bg-muted/80">
         <ToolbarButton onClick={() => editor.chain().focus().undo().run()} title="Desfazer"><Undo className="w-4 h-4" /></ToolbarButton>
         <ToolbarButton onClick={() => editor.chain().focus().redo().run()} title="Refazer"><Redo className="w-4 h-4" /></ToolbarButton>
         <Divider />
