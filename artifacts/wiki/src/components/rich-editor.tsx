@@ -1,4 +1,4 @@
-import { useEditor, EditorContent } from "@tiptap/react";
+import { useEditor, EditorContent, type Editor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Image from "@tiptap/extension-image";
 import { Table } from "@tiptap/extension-table";
@@ -54,6 +54,103 @@ const FONT_COLORS = [
   { name: "Cinza", value: "#9ca3af" },
   { name: "Preto", value: "#111827" },
 ];
+
+function hasTextStyleAttrs(attrs: Record<string, unknown>) {
+  return Object.values(attrs).some((value) => value != null && value !== "");
+}
+
+function getContiguousColorRange(
+  $pos: { pos: number; start: () => number; parent: { forEach: (fn: (node: { nodeSize: number; marks: { attrs: { color?: string | null } }[] }, offset: number) => void) => void } },
+  color: string,
+) {
+  const parentStart = $pos.start();
+  const spans: { from: number; to: number; color: string | null }[] = [];
+  $pos.parent.forEach((node, offset) => {
+    const mark = node.marks.find((item) => item.attrs.color);
+    spans.push({
+      from: parentStart + offset,
+      to: parentStart + offset + node.nodeSize,
+      color: mark?.attrs.color ?? null,
+    });
+  });
+  const index = spans.findIndex((span) => $pos.pos >= span.from && $pos.pos <= span.to);
+  if (index < 0 || spans[index].color !== color) return null;
+  let start = index;
+  let end = index;
+  while (start > 0 && spans[start - 1].color === color) start -= 1;
+  while (end < spans.length - 1 && spans[end + 1].color === color) end += 1;
+  return { from: spans[start].from, to: spans[end].to };
+}
+
+function restoreTextSelection(editor: Editor, saved: { from: number; to: number } | null) {
+  if (!saved) return;
+  const size = editor.state.doc.content.size;
+  const from = Math.max(0, Math.min(saved.from, size));
+  const to = Math.max(0, Math.min(saved.to, size));
+  editor.commands.setTextSelection({ from, to });
+}
+
+function clearFontColor(editor: Editor, saved: { from: number; to: number } | null) {
+  const type = editor.schema.marks.textStyle;
+  if (!type) return;
+
+  restoreTextSelection(editor, saved);
+
+  editor.chain().focus(undefined, { scrollIntoView: false }).command(({ tr }) => {
+    let from = tr.selection.from;
+    let to = tr.selection.to;
+
+    if (from === to) {
+      const currentColor =
+        tr.selection.$from.marks().find((mark) => mark.type === type)?.attrs.color
+        ?? tr.storedMarks?.find((mark) => mark.type === type)?.attrs.color;
+      const range = currentColor
+        ? getContiguousColorRange(tr.selection.$from, currentColor)
+        : null;
+      if (range) {
+        from = range.from;
+        to = range.to;
+      } else {
+        const stored = tr.storedMarks?.find((mark) => mark.type === type)
+          ?? tr.selection.$from.marks().find((mark) => mark.type === type);
+        tr.removeStoredMark(type);
+        if (stored) {
+          const nextAttrs = { ...stored.attrs, color: null };
+          if (hasTextStyleAttrs(nextAttrs)) tr.addStoredMark(type.create(nextAttrs));
+        }
+        return true;
+      }
+    }
+
+    const targets: { pos: number; nodeSize: number; color: string; attrs: Record<string, unknown> }[] = [];
+    tr.doc.nodesBetween(from, to, (node, pos) => {
+      if (!node.isText) return true;
+      const mark = node.marks.find((item) => item.type === type);
+      if (!mark?.attrs.color) return true;
+      targets.push({
+        pos,
+        nodeSize: node.nodeSize,
+        color: mark.attrs.color,
+        attrs: mark.attrs,
+      });
+      return true;
+    });
+
+    for (const target of targets) {
+      const start = Math.max(target.pos, from);
+      const end = Math.min(target.pos + target.nodeSize, to);
+      if (start >= end) continue;
+      const nextAttrs = { ...target.attrs, color: null };
+      tr.removeMark(start, end, type);
+      if (hasTextStyleAttrs(nextAttrs)) {
+        tr.addMark(start, end, type.create(nextAttrs));
+      }
+    }
+
+    tr.removeStoredMark(type);
+    return true;
+  }).run();
+}
 
 const cellExtraAttributes = {
   verticalAlign: {
@@ -250,6 +347,7 @@ export function RichEditor({ value, onChange, placeholder }: RichEditorProps) {
   const [tableMenuOpen, setTableMenuOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const isProgrammaticUpdate = useRef(false);
+  const textSelectionRef = useRef<{ from: number; to: number } | null>(null);
   const rowResizeRef = useRef<{
     startY: number;
     startHeight: number;
@@ -283,6 +381,12 @@ export function RichEditor({ value, onChange, placeholder }: RichEditorProps) {
       if (!isProgrammaticUpdate.current) {
         onChange(editor.getHTML());
       }
+    },
+    onSelectionUpdate({ editor }) {
+      textSelectionRef.current = {
+        from: editor.state.selection.from,
+        to: editor.state.selection.to,
+      };
     },
     editorProps: {
       attributes: {
@@ -421,6 +525,12 @@ export function RichEditor({ value, onChange, placeholder }: RichEditorProps) {
               type="button"
               title="Cor do texto"
               className="p-1.5 rounded hover:bg-primary/20 transition-colors text-muted-foreground hover:text-foreground"
+              onMouseDown={() => {
+                textSelectionRef.current = {
+                  from: editor.state.selection.from,
+                  to: editor.state.selection.to,
+                };
+              }}
             >
               <span className="flex flex-col items-center gap-0.5">
                 <Baseline className="w-4 h-4" />
@@ -442,7 +552,10 @@ export function RichEditor({ value, onChange, placeholder }: RichEditorProps) {
                     type="button"
                     title={swatch.name}
                     onMouseDown={(e) => e.preventDefault()}
-                    onClick={() => editor.chain().focus().setColor(swatch.value).run()}
+                    onClick={() => {
+                      restoreTextSelection(editor, textSelectionRef.current);
+                      editor.chain().focus(undefined, { scrollIntoView: false }).setColor(swatch.value).run();
+                    }}
                     className={cn(
                       "h-6 w-6 rounded-full border border-border shadow-sm",
                       active && "ring-2 ring-primary ring-offset-1 ring-offset-background"
@@ -459,7 +572,10 @@ export function RichEditor({ value, onChange, placeholder }: RichEditorProps) {
                 className="h-8 w-10 cursor-pointer rounded border border-border bg-transparent p-0.5"
                 value={editor.getAttributes("textStyle").color || "#e8c547"}
                 onMouseDown={(e) => e.preventDefault()}
-                onChange={(e) => editor.chain().focus().setColor(e.target.value).run()}
+                onChange={(e) => {
+                  restoreTextSelection(editor, textSelectionRef.current);
+                  editor.chain().focus(undefined, { scrollIntoView: false }).setColor(e.target.value).run();
+                }}
               />
               <Button
                 type="button"
@@ -467,7 +583,7 @@ export function RichEditor({ value, onChange, placeholder }: RichEditorProps) {
                 variant="outline"
                 className="flex-1"
                 onMouseDown={(e) => e.preventDefault()}
-                onClick={() => editor.chain().focus().unsetColor().run()}
+                onClick={() => clearFontColor(editor, textSelectionRef.current)}
               >
                 Remover cor
               </Button>
