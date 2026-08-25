@@ -10,6 +10,8 @@ import Link from "@tiptap/extension-link";
 import TextAlign from "@tiptap/extension-text-align";
 import Underline from "@tiptap/extension-underline";
 import Placeholder from "@tiptap/extension-placeholder";
+import { Color } from "@tiptap/extension-color";
+import { TextStyle } from "@tiptap/extension-text-style";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,7 +26,7 @@ import {
   Undo, Redo, Trash2, Loader2,
   BetweenHorizontalStart, BetweenHorizontalEnd,
   BetweenVerticalStart, BetweenVerticalEnd,
-  Rows3, Columns3,
+  Rows3, Columns3, Baseline,
 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
@@ -37,6 +39,21 @@ interface RichEditorProps {
 }
 
 const TABLE_GRID_MAX = 8;
+
+const FONT_COLORS = [
+  { name: "Ouro", value: "#e8c547" },
+  { name: "Âmbar", value: "#f59e0b" },
+  { name: "Vermelho", value: "#dc2626" },
+  { name: "Rosa", value: "#ec4899" },
+  { name: "Roxo", value: "#8b5cf6" },
+  { name: "Azul", value: "#3b82f6" },
+  { name: "Ciano", value: "#06b6d4" },
+  { name: "Verde", value: "#22c55e" },
+  { name: "Lima", value: "#84cc16" },
+  { name: "Branco", value: "#f8fafc" },
+  { name: "Cinza", value: "#9ca3af" },
+  { name: "Preto", value: "#111827" },
+];
 
 const cellExtraAttributes = {
   verticalAlign: {
@@ -256,6 +273,8 @@ export function RichEditor({ value, onChange, placeholder }: RichEditorProps) {
       AlignedTableCell,
       Youtube.configure({ width: 640, height: 360, HTMLAttributes: { class: "w-full aspect-video rounded-lg my-4" } }),
       Link.configure({ openOnClick: false, HTMLAttributes: { class: "text-primary underline" } }),
+      TextStyle,
+      Color,
       TextAlign.configure({ types: ["heading", "paragraph", "tableCell", "tableHeader"] }),
       Placeholder.configure({ placeholder: placeholder || "Escreva o conteúdo do artigo..." }),
     ],
@@ -396,6 +415,65 @@ export function RichEditor({ value, onChange, placeholder }: RichEditorProps) {
         <ToolbarButton onClick={() => editor.chain().focus().toggleItalic().run()} active={editor.isActive("italic")} title="Itálico"><Italic className="w-4 h-4" /></ToolbarButton>
         <ToolbarButton onClick={() => editor.chain().focus().toggleUnderline().run()} active={editor.isActive("underline")} title="Sublinhado"><UnderlineIcon className="w-4 h-4" /></ToolbarButton>
         <ToolbarButton onClick={() => editor.chain().focus().toggleStrike().run()} active={editor.isActive("strike")} title="Tachado"><Strikethrough className="w-4 h-4" /></ToolbarButton>
+        <Popover>
+          <PopoverTrigger asChild>
+            <button
+              type="button"
+              title="Cor do texto"
+              className="p-1.5 rounded hover:bg-primary/20 transition-colors text-muted-foreground hover:text-foreground"
+            >
+              <span className="flex flex-col items-center gap-0.5">
+                <Baseline className="w-4 h-4" />
+                <span
+                  className="block h-0.5 w-3.5 rounded-sm"
+                  style={{ backgroundColor: editor.getAttributes("textStyle").color || "currentColor" }}
+                />
+              </span>
+            </button>
+          </PopoverTrigger>
+          <PopoverContent className="w-56 p-3 space-y-3" align="start" onOpenAutoFocus={(e) => e.preventDefault()}>
+            <p className="text-sm font-medium">Cor do texto</p>
+            <div className="grid grid-cols-6 gap-1.5">
+              {FONT_COLORS.map((swatch) => {
+                const active = editor.getAttributes("textStyle").color === swatch.value;
+                return (
+                  <button
+                    key={swatch.value}
+                    type="button"
+                    title={swatch.name}
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => editor.chain().focus().setColor(swatch.value).run()}
+                    className={cn(
+                      "h-6 w-6 rounded-full border border-border shadow-sm",
+                      active && "ring-2 ring-primary ring-offset-1 ring-offset-background"
+                    )}
+                    style={{ backgroundColor: swatch.value }}
+                  />
+                );
+              })}
+            </div>
+            <div className="flex items-center gap-2">
+              <input
+                type="color"
+                aria-label="Cor personalizada"
+                className="h-8 w-10 cursor-pointer rounded border border-border bg-transparent p-0.5"
+                value={editor.getAttributes("textStyle").color || "#e8c547"}
+                onMouseDown={(e) => e.preventDefault()}
+                onChange={(e) => editor.chain().focus().setColor(e.target.value).run()}
+              />
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                className="flex-1"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => editor.chain().focus().unsetColor().run()}
+              >
+                Remover cor
+              </Button>
+            </div>
+          </PopoverContent>
+        </Popover>
         <Divider />
         <ToolbarButton onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} active={editor.isActive("heading", { level: 1 })} title="Título 1"><Heading1 className="w-4 h-4" /></ToolbarButton>
         <ToolbarButton onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} active={editor.isActive("heading", { level: 2 })} title="Título 2"><Heading2 className="w-4 h-4" /></ToolbarButton>
