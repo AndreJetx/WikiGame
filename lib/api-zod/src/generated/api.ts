@@ -222,3 +222,70 @@ export const GetWikiStatsResponse = zod.object({
 })
 
 
+/**
+ * @summary List adjacent tools and sites
+ */
+export const ListToolsResponseItem = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "description": zod.string().optional(),
+  "href": zod.string(),
+  "external": zod.boolean(),
+  "sortOrder": zod.number(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+export const ListToolsResponse = zod.array(ListToolsResponseItem)
+
+
+/**
+ * @summary Create a tool link
+ */
+
+
+
+
+export const CreateToolBody = zod.object({
+  "name": zod.string().min(1),
+  "description": zod.string().optional(),
+  "href": zod.string().min(1),
+  "external": zod.boolean().optional(),
+  "sortOrder": zod.number().optional()
+})
+
+
+/**
+ * @summary Update a tool link
+ */
+export const UpdateToolParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const UpdateToolBody = zod.object({
+  "name": zod.string().optional(),
+  "description": zod.string().optional(),
+  "href": zod.string().optional(),
+  "external": zod.boolean().optional(),
+  "sortOrder": zod.number().optional()
+})
+
+export const UpdateToolResponse = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "description": zod.string().optional(),
+  "href": zod.string(),
+  "external": zod.boolean(),
+  "sortOrder": zod.number(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+
+
+/**
+ * @summary Delete a tool link
+ */
+export const DeleteToolParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+

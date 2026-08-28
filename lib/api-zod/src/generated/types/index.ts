@@ -14,4 +14,7 @@ export * from './healthStatus';
 export * from './listArticlesParams';
 export * from './listRecentArticlesParams';
 export * from './searchArticlesParams';
+export * from './tool';
+export * from './toolInput';
+export * from './toolUpdate';
 export * from './wikiStats';

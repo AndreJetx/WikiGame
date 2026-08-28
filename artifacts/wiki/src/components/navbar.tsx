@@ -1,8 +1,49 @@
-import { Link } from "wouter";
-import { Search, Moon, Sun } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Link, useLocation } from "wouter";
+import { Menu, Search, Moon, Sun } from "lucide-react";
 import { useTheme } from "./theme-provider";
 import { Button } from "./ui/button";
 import { WikiLogo } from "./wiki-logo";
+import { SidebarNav } from "./sidebar";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "./ui/sheet";
+
+function MobileWikiMenu() {
+  const [open, setOpen] = useState(false);
+  const [location] = useLocation();
+
+  useEffect(() => {
+    setOpen(false);
+  }, [location]);
+
+  return (
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="md:hidden shrink-0 -ml-2"
+          aria-label="Abrir menu da wiki"
+        >
+          <Menu className="h-5 w-5" />
+        </Button>
+      </SheetTrigger>
+      <SheetContent side="left" className="w-72 p-0 bg-card border-border">
+        <SheetHeader className="px-4 py-4 pr-12 border-b border-border text-left">
+          <SheetTitle className="font-serif text-primary">Menu</SheetTitle>
+        </SheetHeader>
+        <div className="h-[calc(100vh-4.5rem)] overflow-y-auto p-4">
+          <SidebarNav />
+        </div>
+      </SheetContent>
+    </Sheet>
+  );
+}
 
 export function Navbar() {
   const { theme, setTheme } = useTheme();
@@ -10,7 +51,8 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-[4.5rem] max-w-screen-2xl items-center px-4 md:px-8">
-        <div className="mr-2 md:mr-4 flex min-w-0">
+        <div className="mr-2 md:mr-4 flex min-w-0 items-center">
+          <MobileWikiMenu />
           <Link href="/" className="mr-2 md:mr-6 flex items-center shrink-0">
             <WikiLogo />
           </Link>

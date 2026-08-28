@@ -17,6 +17,8 @@ tags:
     description: Search operations
   - name: stats
     description: Wiki stats
+  - name: tools
+    description: Adjacent tools and sites
 paths:
   /healthz:
     get:
@@ -225,6 +227,78 @@ paths:
               schema:
                 $ref: "#/components/schemas/WikiStats"
 
+  /tools:
+    get:
+      operationId: listTools
+      tags: [tools]
+      summary: List adjacent tools and sites
+      responses:
+        "200":
+          description: Tools
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Tool"
+    post:
+      operationId: createTool
+      tags: [tools]
+      summary: Create a tool link
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ToolInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Tool"
+
+  /tools/{id}:
+    put:
+      operationId: updateTool
+      tags: [tools]
+      summary: Update a tool link
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ToolUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Tool"
+        "404":
+          description: Not found
+    delete:
+      operationId: deleteTool
+      tags: [tools]
+      summary: Delete a tool link
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
 components:
   schemas:
     HealthStatus:
@@ -342,4 +416,56 @@ components:
         totalViews:
           type: integer
         recentEdits:
+          type: integer
+
+    Tool:
+      type: object
+      required: [id, name, href, external, sortOrder, createdAt, updatedAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        href:
+          type: string
+        external:
+          type: boolean
+        sortOrder:
+          type: integer
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    ToolInput:
+      type: object
+      required: [name, href]
+      properties:
+        name:
+          type: string
+          minLength: 1
+        description:
+          type: string
+        href:
+          type: string
+          minLength: 1
+        external:
+          type: boolean
+        sortOrder:
+          type: integer
+
+    ToolUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        href:
+          type: string
+        external:
+          type: boolean
+        sortOrder:
           type: integer

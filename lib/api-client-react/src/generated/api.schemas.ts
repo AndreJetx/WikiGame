@@ -68,6 +68,35 @@ export interface WikiStats {
   recentEdits: number;
 }
 
+export interface Tool {
+  id: number;
+  name: string;
+  description?: string;
+  href: string;
+  external: boolean;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ToolInput {
+  /** @minLength 1 */
+  name: string;
+  description?: string;
+  /** @minLength 1 */
+  href: string;
+  external?: boolean;
+  sortOrder?: number;
+}
+
+export interface ToolUpdate {
+  name?: string;
+  description?: string;
+  href?: string;
+  external?: boolean;
+  sortOrder?: number;
+}
+
 export type ListArticlesParams = {
 category?: string;
 tag?: string;

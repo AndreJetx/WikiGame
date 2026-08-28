@@ -1,6 +1,7 @@
 import type { ElementType } from "react";
 import { Link } from "wouter";
-import { useListCategories, getListCategoriesQueryKey } from "@workspace/api-client-react";
+import { ExternalLink, Wrench } from "lucide-react";
+import { useListCategories, getListCategoriesQueryKey, useListTools, getListToolsQueryKey } from "@workspace/api-client-react";
 import equipmentIcon from "@assets/equipment-icon.png";
 import spiritsIcon from "@assets/spirits-icon.png";
 import classesIcon from "@assets/classes-icon.png";
@@ -61,44 +62,95 @@ export function CategoryIcon({
   return null;
 }
 
-export function Sidebar() {
+export function SidebarNav() {
   const { data: serverCategories } = useListCategories({
     query: { queryKey: getListCategoriesQueryKey() }
   });
+  const { data: tools } = useListTools({
+    query: { queryKey: getListToolsQueryKey() }
+  });
 
   return (
+    <>
+      <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider mb-4 px-2">Categorias</h3>
+      <nav className="space-y-1">
+        {CATEGORIES.map((cat) => {
+          const serverCat = serverCategories?.find(c => c.slug === cat.slug);
+          const count = serverCat?.articleCount || 0;
+          return (
+            <Link
+              key={cat.id}
+              href={`/wiki/${cat.slug}`}
+              className="flex items-center justify-between px-3 py-2 rounded-md hover:bg-primary/10 hover:text-primary text-sm font-medium transition-colors group"
+            >
+              <div className="flex items-center gap-3">
+                <span className="group-hover:scale-110 transition-transform inline-flex">
+                  <CategoryIcon
+                    category={cat}
+                    className="w-8 h-8"
+                    lucideClassName="w-4 h-4 text-primary"
+                  />
+                </span>
+                {cat.name}
+              </div>
+              {count > 0 && (
+                <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-full group-hover:bg-primary/20 group-hover:text-primary transition-colors">
+                  {count}
+                </span>
+              )}
+            </Link>
+          )
+        })}
+      </nav>
+
+      {tools && tools.length > 0 ? (
+        <>
+          <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider mt-6 mb-4 px-2">Ferramentas</h3>
+          <nav className="space-y-1">
+            {tools.map((tool) => {
+              const content = (
+                <>
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span className="group-hover:scale-110 transition-transform inline-flex w-8 h-8 items-center justify-center">
+                      <Wrench className="w-4 h-4 text-primary" />
+                    </span>
+                    <span className="truncate">{tool.name}</span>
+                  </div>
+                  {tool.external ? (
+                    <ExternalLink className="w-3.5 h-3.5 shrink-0 text-muted-foreground group-hover:text-primary" />
+                  ) : null}
+                </>
+              );
+              const className = "flex items-center justify-between px-3 py-2 rounded-md hover:bg-primary/10 hover:text-primary text-sm font-medium transition-colors group";
+
+              return tool.external ? (
+                <a
+                  key={tool.id}
+                  href={tool.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={className}
+                >
+                  {content}
+                </a>
+              ) : (
+                <Link key={tool.id} href={tool.href} className={className}>
+                  {content}
+                </Link>
+              );
+            })}
+          </nav>
+        </>
+      ) : null}
+    </>
+  );
+}
+
+export function Sidebar() {
+  return (
     <aside className="w-64 shrink-0 p-4 border-r border-border hidden md:block bg-card/30 backdrop-blur-sm">
-      <div className="sticky top-20">
-        <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider mb-4 px-2">Categorias</h3>
-        <nav className="space-y-1">
-          {CATEGORIES.map((cat) => {
-            const serverCat = serverCategories?.find(c => c.slug === cat.slug);
-            const count = serverCat?.articleCount || 0;
-            return (
-              <Link
-                key={cat.id}
-                href={`/wiki/${cat.slug}`}
-                className="flex items-center justify-between px-3 py-2 rounded-md hover:bg-primary/10 hover:text-primary text-sm font-medium transition-colors group"
-              >
-                <div className="flex items-center gap-3">
-                  <span className="group-hover:scale-110 transition-transform inline-flex">
-                    <CategoryIcon
-                      category={cat}
-                      className="w-8 h-8"
-                      lucideClassName="w-4 h-4 text-primary"
-                    />
-                  </span>
-                  {cat.name}
-                </div>
-                {count > 0 && (
-                  <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-full group-hover:bg-primary/20 group-hover:text-primary transition-colors">
-                    {count}
-                  </span>
-                )}
-              </Link>
-            )
-          })}
-        </nav>
+      <div className="sticky top-20 max-h-[calc(100vh-6rem)] overflow-y-auto">
+        <SidebarNav />
       </div>
     </aside>
   );

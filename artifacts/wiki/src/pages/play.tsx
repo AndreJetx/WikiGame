@@ -2,8 +2,7 @@ import { Layout } from "@/components/layout";
 import { Link } from "wouter";
 import { ArrowLeft, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
-export const GAME_URL = "https://elementsh5.joynetgame.com/";
+import { GAME_URL } from "@/lib/tools";
 
 export function Play() {
   return (

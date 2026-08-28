@@ -1,0 +1,106 @@
+import { Router } from "express";
+import { db, toolsTable } from "@workspace/db";
+import { asc, eq, sql } from "drizzle-orm";
+import {
+  CreateToolBody,
+  DeleteToolParams,
+  UpdateToolBody,
+  UpdateToolParams,
+} from "@workspace/api-zod";
+
+const router = Router();
+
+function serializeTool(tool: typeof toolsTable.$inferSelect) {
+  return {
+    ...tool,
+    createdAt: tool.createdAt.toISOString(),
+    updatedAt: tool.updatedAt.toISOString(),
+  };
+}
+
+router.get("/tools", async (_req, res) => {
+  const tools = await db
+    .select()
+    .from(toolsTable)
+    .orderBy(asc(toolsTable.sortOrder), asc(toolsTable.id));
+  res.json(tools.map(serializeTool));
+});
+
+router.post("/tools", async (req, res) => {
+  const parsed = CreateToolBody.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: "Invalid body" });
+    return;
+  }
+
+  const href = parsed.data.href.trim();
+  const external = parsed.data.external ?? /^https?:\/\//i.test(href);
+
+  let sortOrder = parsed.data.sortOrder;
+  if (sortOrder === undefined) {
+    const [row] = await db
+      .select({ max: sql<number>`coalesce(max(${toolsTable.sortOrder}), -1)` })
+      .from(toolsTable);
+    sortOrder = Number(row?.max ?? -1) + 1;
+  }
+
+  const [tool] = await db
+    .insert(toolsTable)
+    .values({
+      name: parsed.data.name.trim(),
+      description: parsed.data.description ?? "",
+      href,
+      external,
+      sortOrder,
+    })
+    .returning();
+
+  res.status(201).json(serializeTool(tool));
+});
+
+router.put("/tools/:id", async (req, res) => {
+  const paramsParsed = UpdateToolParams.safeParse(req.params);
+  const bodyParsed = UpdateToolBody.safeParse(req.body);
+  if (!paramsParsed.success || !bodyParsed.success) {
+    res.status(400).json({ error: "Invalid request" });
+    return;
+  }
+
+  const updates: Partial<typeof toolsTable.$inferInsert> = {
+    updatedAt: new Date(),
+  };
+  if (bodyParsed.data.name !== undefined) updates.name = bodyParsed.data.name.trim();
+  if (bodyParsed.data.description !== undefined) updates.description = bodyParsed.data.description;
+  if (bodyParsed.data.href !== undefined) {
+    updates.href = bodyParsed.data.href.trim();
+    if (bodyParsed.data.external === undefined) {
+      updates.external = /^https?:\/\//i.test(updates.href);
+    }
+  }
+  if (bodyParsed.data.external !== undefined) updates.external = bodyParsed.data.external;
+  if (bodyParsed.data.sortOrder !== undefined) updates.sortOrder = bodyParsed.data.sortOrder;
+
+  const [tool] = await db
+    .update(toolsTable)
+    .set(updates)
+    .where(eq(toolsTable.id, paramsParsed.data.id))
+    .returning();
+
+  if (!tool) {
+    res.status(404).json({ error: "Not found" });
+    return;
+  }
+  res.json(serializeTool(tool));
+});
+
+router.delete("/tools/:id", async (req, res) => {
+  const parsed = DeleteToolParams.safeParse(req.params);
+  if (!parsed.success) {
+    res.status(400).json({ error: "Invalid params" });
+    return;
+  }
+  await db.delete(toolsTable).where(eq(toolsTable.id, parsed.data.id));
+  res.status(204).send();
+});
+
+export default router;

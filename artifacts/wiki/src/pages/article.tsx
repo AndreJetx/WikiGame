@@ -7,13 +7,7 @@ import { motion } from "framer-motion";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ChevronRight, Eye, Calendar } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-
-function wrapContentTables(html: string) {
-  if (!html.includes("<table")) return html;
-  return html
-    .replace(/<table\b/gi, '<div class="table-scroll"><table')
-    .replace(/<\/table>/gi, "</table></div>");
-}
+import { ArticleBody } from "@/components/wiki-table-gallery";
 
 export function Article() {
   const [match, params] = useRoute("/wiki/:category/:slug");
@@ -89,10 +83,7 @@ export function Article() {
               </div>
             )}
 
-            <div
-              className="tiptap-content"
-              dangerouslySetInnerHTML={{ __html: wrapContentTables(article.content) }}
-            />
+            <ArticleBody html={article.content} />
 
             {article.tags && article.tags.length > 0 && (
               <div className="mt-12 pt-8 border-t border-border flex flex-wrap gap-2 not-prose">
