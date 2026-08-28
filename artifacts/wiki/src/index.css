@@ -401,11 +401,12 @@
   }
 }
 .wiki-table-card {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: stretch;
   text-align: center;
-  padding: 0.6rem;
+  padding: 0.6rem 0.6rem 1.55rem;
   border: 1px solid hsl(var(--border));
   border-radius: 0.9rem;
   background: hsl(var(--card) / 0.55);
@@ -417,6 +418,31 @@
   border-color: hsl(var(--primary) / 0.55);
   background: hsl(var(--card) / 0.9);
   outline: none;
+}
+.wiki-table-card:hover .wiki-table-card-plus,
+.wiki-table-card:focus-visible .wiki-table-card-plus {
+  border-color: hsl(var(--primary) / 0.8);
+  background: hsl(var(--primary) / 0.18);
+  color: hsl(var(--primary));
+}
+.wiki-table-card-plus {
+  position: absolute;
+  right: 0.4rem;
+  bottom: 0.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.35rem;
+  height: 1.35rem;
+  border-radius: 999px;
+  border: 1px solid hsl(var(--primary) / 0.55);
+  background: hsl(var(--primary) / 0.12);
+  color: hsl(var(--primary));
+  pointer-events: none;
+}
+.wiki-table-card-plus svg {
+  width: 0.8rem;
+  height: 0.8rem;
 }
 .wiki-table-card-body,
 .wiki-table-card-body > * {

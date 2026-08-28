@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeftRight, ChevronLeft, ChevronRight, LayoutGrid } from "lucide-react";
+import { ArrowLeftRight, ChevronLeft, ChevronRight, LayoutGrid, Plus } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -139,6 +139,14 @@ function useGalleryLayout() {
   return { layout, choose, isMobile, showStack: isMobile && layout === "stack" };
 }
 
+function CardClickHint() {
+  return (
+    <span className="wiki-table-card-plus" aria-hidden="true">
+      <Plus />
+    </span>
+  );
+}
+
 function WikiCardList({
   table,
   onOpen,
@@ -175,6 +183,7 @@ function WikiCardList({
               className="wiki-table-card-body"
               dangerouslySetInnerHTML={{ __html: row[0].html }}
             />
+            <CardClickHint />
           </button>
         ))}
       </div>
@@ -389,6 +398,7 @@ export function WikiTableGallery({ table }: { table: WikiTableData }) {
                   className="wiki-table-card-body"
                   dangerouslySetInnerHTML={{ __html: preview.html }}
                 />
+                <CardClickHint />
               </button>
             );
           })}
