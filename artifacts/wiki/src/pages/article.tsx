@@ -8,6 +8,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ChevronRight, Eye, Calendar } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
+function wrapContentTables(html: string) {
+  if (!html.includes("<table")) return html;
+  return html
+    .replace(/<table\b/gi, '<div class="table-scroll"><table')
+    .replace(/<\/table>/gi, "</table></div>");
+}
+
 export function Article() {
   const [match, params] = useRoute("/wiki/:category/:slug");
   const slug = params?.slug || "";
@@ -49,7 +56,7 @@ export function Article() {
           <motion.article
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="prose prose-stone dark:prose-invert prose-headings:font-serif prose-h1:text-4xl prose-h1:text-primary prose-a:text-primary prose-table:w-full prose-th:bg-muted/50 prose-td:border prose-td:border-border prose-th:border prose-th:border-border max-w-none"
+            className="prose prose-stone dark:prose-invert prose-headings:font-serif prose-h1:text-4xl prose-h1:text-primary prose-a:text-primary prose-th:bg-muted/50 prose-td:border prose-td:border-border prose-th:border prose-th:border-border max-w-none"
           >
             <h1 className="mb-4">{article.title}</h1>
 
@@ -84,7 +91,7 @@ export function Article() {
 
             <div
               className="tiptap-content"
-              dangerouslySetInnerHTML={{ __html: article.content }}
+              dangerouslySetInnerHTML={{ __html: wrapContentTables(article.content) }}
             />
 
             {article.tags && article.tags.length > 0 && (

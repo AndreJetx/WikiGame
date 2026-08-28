@@ -303,27 +303,56 @@
   margin: 1em 0;
   border: none;
 }
+.tiptap-content .table-scroll,
+.tiptap-content .tableWrapper {
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  max-width: 100%;
+  margin: 1.5em 0;
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--primary) / 0.55) hsl(var(--muted) / 0.35);
+}
+.tiptap-content .table-scroll::-webkit-scrollbar,
+.tiptap-content .tableWrapper::-webkit-scrollbar {
+  height: 8px;
+}
+.tiptap-content .table-scroll::-webkit-scrollbar-thumb,
+.tiptap-content .tableWrapper::-webkit-scrollbar-thumb {
+  background: hsl(var(--primary) / 0.45);
+  border-radius: 999px;
+}
+.prose .tiptap-content table,
 .tiptap-content table,
 .tiptap-content .wiki-table {
   width: 100%;
+  max-width: none;
   border-collapse: collapse;
-  table-layout: fixed;
-  margin: 1.5em 0;
+  table-layout: auto;
+  margin: 0;
 }
 .tiptap-content th,
 .tiptap-content td {
   border: 1px solid hsl(var(--border));
   padding: 0.5em 0.75em;
   box-sizing: border-box;
-  word-break: break-word;
+  word-break: normal;
+  overflow-wrap: break-word;
   vertical-align: top;
 }
 .tiptap-content th {
   background: hsl(var(--muted) / 0.5);
   font-weight: 600;
 }
-.tiptap-content .tableWrapper {
-  overflow-x: auto;
+@media (max-width: 767px) {
+  .prose .tiptap-content table,
+  .tiptap-content table,
+  .tiptap-content .wiki-table {
+    /* Same inner width as desktop article (max-w-4xl minus p-8). */
+    width: 52rem;
+    min-width: 52rem;
+  }
 }
 .tiptap-content a {
   color: hsl(var(--primary));
@@ -347,7 +376,12 @@
 /* TipTap editor table styles */
 .tiptap .tableWrapper {
   overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  max-width: 100%;
   margin: 0.75em 0;
+  scrollbar-width: thin;
 }
 .tiptap table,
 .tiptap .wiki-table {
@@ -355,7 +389,15 @@
   table-layout: fixed;
   width: 100%;
   margin: 0;
-  overflow: hidden;
+  overflow: visible;
+}
+@media (max-width: 767px) {
+  .tiptap table,
+  .tiptap .wiki-table {
+    width: 42rem;
+    min-width: 42rem;
+    max-width: none;
+  }
 }
 .tiptap th,
 .tiptap td {
