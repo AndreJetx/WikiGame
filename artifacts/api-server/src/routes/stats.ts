@@ -1,10 +1,12 @@
 import { Router } from "express";
 import { db, articlesTable, categoriesTable } from "@workspace/db";
 import { sql } from "drizzle-orm";
+import { ensureDefaultCategories } from "../lib/seed-categories";
 
 const router = Router();
 
 router.get("/stats", async (req, res) => {
+  await ensureDefaultCategories();
   const [{ totalArticles }] = await db
     .select({ totalArticles: sql<number>`count(*)::int` })
     .from(articlesTable);

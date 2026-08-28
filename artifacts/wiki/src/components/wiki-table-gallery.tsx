@@ -104,6 +104,48 @@ export function parseArticleBlocks(html: string): ArticleBlock[] {
   return blocks;
 }
 
+type ArticleHeading = {
+  id: string;
+  text: string;
+};
+
+function slugifyHeading(text: string, used: Set<string>) {
+  const base =
+    text
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "") || "secao";
+  let id = base;
+  let n = 2;
+  while (used.has(id)) {
+    id = `${base}-${n++}`;
+  }
+  used.add(id);
+  return id;
+}
+
+function injectHeadingIds(html: string): { html: string; headings: ArticleHeading[] } {
+  if (!html) return { html: "", headings: [] };
+  const container = document.createElement("div");
+  container.innerHTML = html;
+  const used = new Set<string>();
+  const headings: ArticleHeading[] = [];
+
+  container.querySelectorAll("h1").forEach((heading) => {
+    if (heading.closest("table")) return;
+    const text = (heading.textContent || "").replace(/\s+/g, " ").trim();
+    if (!text) return;
+    const id = heading.id?.trim() || slugifyHeading(text, used);
+    used.add(id);
+    heading.id = id;
+    headings.push({ id, text });
+  });
+
+  return { html: container.innerHTML, headings };
+}
+
 const LAYOUT_KEY = "wiki-table-layout";
 type GalleryLayout = "grid" | "stack";
 
@@ -469,17 +511,46 @@ export function WikiTableGallery({ table }: { table: WikiTableData }) {
 }
 
 export function ArticleBody({ html }: { html: string }) {
-  const blocks = useMemo(() => parseArticleBlocks(html), [html]);
+  const { blocks, headings } = useMemo(() => {
+    const prepared = injectHeadingIds(html);
+    return {
+      blocks: parseArticleBlocks(prepared.html),
+      headings: prepared.headings,
+    };
+  }, [html]);
+
+  useEffect(() => {
+    const hash = window.location.hash.replace(/^#/, "");
+    if (!hash) return;
+    const target = document.getElementById(hash);
+    if (!target) return;
+    const top = target.getBoundingClientRect().top + window.scrollY - 88;
+    window.scrollTo({ top, behavior: "smooth" });
+  }, [html]);
 
   return (
-    <div className="tiptap-content">
-      {blocks.map((block, index) =>
-        block.type === "html" ? (
-          <div key={index} dangerouslySetInnerHTML={{ __html: block.html }} />
-        ) : (
-          <WikiTableGallery key={index} table={block.table} />
-        ),
-      )}
-    </div>
+    <>
+      {headings.length > 0 ? (
+        <nav className="article-toc not-prose" aria-label="Sumário">
+          <h2>Sumário</h2>
+          <ol>
+            {headings.map((heading) => (
+              <li key={heading.id}>
+                <a href={`#${heading.id}`}>{heading.text}</a>
+              </li>
+            ))}
+          </ol>
+        </nav>
+      ) : null}
+      <div className="tiptap-content">
+        {blocks.map((block, index) =>
+          block.type === "html" ? (
+            <div key={index} dangerouslySetInnerHTML={{ __html: block.html }} />
+          ) : (
+            <WikiTableGallery key={index} table={block.table} />
+          ),
+        )}
+      </div>
+    </>
   );
 }

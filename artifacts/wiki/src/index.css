@@ -261,6 +261,7 @@
   margin-top: 1.5em;
   margin-bottom: 0.5em;
   line-height: 1.3;
+  scroll-margin-top: 5.5rem;
 }
 .tiptap-content h1 { font-size: 2em; color: hsl(var(--primary)); }
 .tiptap-content h2 { font-size: 1.5em; }
@@ -337,6 +338,40 @@
 
 .wiki-table-gallery {
   margin: 1.5em 0;
+}
+.article-toc {
+  margin: 0 0 2rem;
+  padding: 1rem 1.2rem 1.1rem;
+  border: 1px solid hsl(var(--border) / 0.7);
+  border-radius: 0.9rem;
+  background: hsl(var(--card) / 0.45);
+}
+.article-toc h2 {
+  margin: 0 0 0.7rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: hsl(var(--muted-foreground));
+}
+.article-toc ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.article-toc a {
+  display: block;
+  color: hsl(var(--primary));
+  text-decoration: none;
+  font-family: var(--font-serif);
+  font-size: 1.05rem;
+  line-height: 1.35;
+}
+.article-toc a:hover {
+  text-decoration: underline;
 }
 .wiki-table-toolbar {
   display: flex;

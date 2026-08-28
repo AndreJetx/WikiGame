@@ -1,21 +1,27 @@
 import { Router } from "express";
 import { db, articlesTable, categoriesTable } from "@workspace/db";
-import { eq, sql } from "drizzle-orm";
+import { sql } from "drizzle-orm";
+import { ensureDefaultCategories } from "../lib/seed-categories";
 
 const router = Router();
 
-router.get("/categories", async (req, res) => {
+router.get("/categories", async (_req, res) => {
+  await ensureDefaultCategories();
   const cats = await db.select().from(categoriesTable);
-  const result = await Promise.all(
-    cats.map(async (cat) => {
-      const [{ count }] = await db
-        .select({ count: sql<number>`count(*)::int` })
-        .from(articlesTable)
-        .where(eq(articlesTable.category, cat.slug));
-      return { ...cat, articleCount: count };
+  const counts = await db
+    .select({
+      category: articlesTable.category,
+      count: sql<number>`count(*)::int`,
     })
+    .from(articlesTable)
+    .groupBy(articlesTable.category);
+  const countMap = new Map(counts.map((row) => [row.category, row.count]));
+  res.json(
+    cats.map((cat) => ({
+      ...cat,
+      articleCount: countMap.get(cat.slug) ?? 0,
+    })),
   );
-  res.json(result);
 });
 
 export default router;
