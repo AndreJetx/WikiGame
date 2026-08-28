@@ -419,13 +419,15 @@
   background: hsl(var(--card) / 0.9);
   outline: none;
 }
-.wiki-table-card:hover .wiki-table-card-plus,
-.wiki-table-card:focus-visible .wiki-table-card-plus {
+.wiki-table-card:hover .card-click-plus,
+.wiki-table-card:focus-visible .card-click-plus,
+a:hover .card-click-plus,
+.group:hover .card-click-plus {
   border-color: hsl(var(--primary) / 0.8);
   background: hsl(var(--primary) / 0.18);
   color: hsl(var(--primary));
 }
-.wiki-table-card-plus {
+.card-click-plus {
   position: absolute;
   right: 0.4rem;
   bottom: 0.4rem;
@@ -439,8 +441,9 @@
   background: hsl(var(--primary) / 0.12);
   color: hsl(var(--primary));
   pointer-events: none;
+  z-index: 1;
 }
-.wiki-table-card-plus svg {
+.card-click-plus svg {
   width: 0.8rem;
   height: 0.8rem;
 }

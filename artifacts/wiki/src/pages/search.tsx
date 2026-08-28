@@ -5,6 +5,7 @@ import { useSearchArticles, getSearchArticlesQueryKey } from "@workspace/api-cli
 import { Link } from "wouter";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { CardClickHint } from "@/components/card-click-hint";
 import { Search as SearchIcon, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -65,7 +66,7 @@ export function Search() {
                 transition={{ delay: index * 0.05 }}
               >
                 <Link href={`/wiki/${article.category}/${article.slug}`}>
-                  <Card className="hover:border-primary/50 transition-colors bg-card/50 cursor-pointer">
+                  <Card className="relative hover:border-primary/50 transition-colors bg-card/50 cursor-pointer group pb-8">
                     <CardHeader>
                       <div className="flex justify-between items-start gap-4">
                         <div>
@@ -77,6 +78,7 @@ export function Search() {
                         </span>
                       </div>
                     </CardHeader>
+                    <CardClickHint />
                   </Card>
                 </Link>
               </motion.div>

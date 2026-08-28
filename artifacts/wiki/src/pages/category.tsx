@@ -5,6 +5,7 @@ import { useRoute, Link } from "wouter";
 import { useListArticles, getListArticlesQueryKey } from "@workspace/api-client-react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { CardClickHint } from "@/components/card-click-hint";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ChevronRight } from "lucide-react";
 
@@ -70,7 +71,7 @@ export function Category() {
                 transition={{ delay: index * 0.05 }}
               >
                 <Link href={`/wiki/${article.category}/${article.slug}`}>
-                  <Card className="h-full hover:border-primary/50 transition-colors bg-card/50 cursor-pointer overflow-hidden group">
+                  <Card className="relative h-full hover:border-primary/50 transition-colors bg-card/50 cursor-pointer overflow-hidden group pb-8">
                     {article.imageUrl && (
                       <div className="h-32 w-full overflow-hidden border-b border-border">
                         <CloudinaryImage
@@ -87,6 +88,7 @@ export function Category() {
                       <CardTitle className="line-clamp-2">{article.title}</CardTitle>
                       <CardDescription className="line-clamp-2 mt-2">{article.excerpt}</CardDescription>
                     </CardHeader>
+                    <CardClickHint />
                   </Card>
                 </Link>
               </motion.div>

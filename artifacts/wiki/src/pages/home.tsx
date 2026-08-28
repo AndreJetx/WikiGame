@@ -6,6 +6,7 @@ import coverImage from "@assets/legend-of-elements-upcoming-launch-cover_1779364
 import { motion } from "framer-motion";
 import { useListRecentArticles, useListFeaturedArticles, useGetWikiStats, getGetWikiStatsQueryKey } from "@workspace/api-client-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { CardClickHint } from "@/components/card-click-hint";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowRight, Star, BookOpen, Layers, Activity, Eye } from "lucide-react";
 
@@ -105,7 +106,7 @@ export function Home() {
             ) : featuredArticles?.length ? (
               featuredArticles.map(article => (
                 <Link key={article.id} href={`/wiki/${article.category}/${article.slug}`}>
-                  <Card className="h-full hover:border-primary/50 transition-colors bg-card/50 cursor-pointer overflow-hidden group">
+                  <Card className="relative h-full hover:border-primary/50 transition-colors bg-card/50 cursor-pointer overflow-hidden group pb-8">
                     {article.imageUrl && (
                       <div className="h-24 w-full overflow-hidden">
                         <CloudinaryImage
@@ -122,6 +123,7 @@ export function Home() {
                       <CardTitle className="line-clamp-2 text-primary group-hover:text-primary/80 transition-colors">{article.title}</CardTitle>
                       <CardDescription className="line-clamp-2">{article.excerpt}</CardDescription>
                     </CardHeader>
+                    <CardClickHint />
                   </Card>
                 </Link>
               ))
@@ -141,7 +143,7 @@ export function Home() {
             ) : recentArticles?.length ? (
               recentArticles.map(article => (
                 <Link key={article.id} href={`/wiki/${article.category}/${article.slug}`}>
-                  <div className="flex items-center gap-4 p-4 rounded-xl border border-border/50 hover:bg-primary/5 transition-colors cursor-pointer group bg-card/30">
+                  <div className="relative flex items-center gap-4 p-4 pr-10 rounded-xl border border-border/50 hover:bg-primary/5 transition-colors cursor-pointer group bg-card/30">
                     <div className="w-12 h-12 rounded-lg bg-primary/20 flex items-center justify-center shrink-0 group-hover:bg-primary/30 transition-colors">
                       {(() => {
                         const cat = CATEGORIES.find(c => c.slug === article.category);
@@ -158,6 +160,7 @@ export function Home() {
                       <h4 className="font-medium text-foreground line-clamp-1 group-hover:text-primary transition-colors">{article.title}</h4>
                       <p className="text-sm text-muted-foreground">Atualizado em {new Date(article.updatedAt).toLocaleDateString("pt-BR")}</p>
                     </div>
+                    <CardClickHint />
                   </div>
                 </Link>
               ))
