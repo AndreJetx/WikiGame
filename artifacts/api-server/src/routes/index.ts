@@ -5,10 +5,12 @@ import categoriesRouter from "./categories";
 import searchRouter from "./search";
 import statsRouter from "./stats";
 import toolsRouter from "./tools";
+import adminRouter from "./admin";
 
 const router: IRouter = Router();
 
 router.use(healthRouter);
+router.use(adminRouter);
 router.use(articlesRouter);
 router.use(categoriesRouter);
 router.use(searchRouter);

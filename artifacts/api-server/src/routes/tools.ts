@@ -7,6 +7,7 @@ import {
   UpdateToolBody,
   UpdateToolParams,
 } from "@workspace/api-zod";
+import { requireAdmin } from "../middlewares/require-admin";
 
 const router = Router();
 
@@ -26,7 +27,7 @@ router.get("/tools", async (_req, res) => {
   res.json(tools.map(serializeTool));
 });
 
-router.post("/tools", async (req, res) => {
+router.post("/tools", requireAdmin, async (req, res) => {
   const parsed = CreateToolBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: "Invalid body" });
@@ -58,7 +59,7 @@ router.post("/tools", async (req, res) => {
   res.status(201).json(serializeTool(tool));
 });
 
-router.put("/tools/:id", async (req, res) => {
+router.put("/tools/:id", requireAdmin, async (req, res) => {
   const paramsParsed = UpdateToolParams.safeParse(req.params);
   const bodyParsed = UpdateToolBody.safeParse(req.body);
   if (!paramsParsed.success || !bodyParsed.success) {
@@ -93,7 +94,7 @@ router.put("/tools/:id", async (req, res) => {
   res.json(serializeTool(tool));
 });
 
-router.delete("/tools/:id", async (req, res) => {
+router.delete("/tools/:id", requireAdmin, async (req, res) => {
   const parsed = DeleteToolParams.safeParse(req.params);
   if (!parsed.success) {
     res.status(400).json({ error: "Invalid params" });

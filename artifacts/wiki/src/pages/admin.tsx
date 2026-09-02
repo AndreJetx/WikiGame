@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { Layout } from "@/components/layout";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useListArticles, useCreateArticle, useUpdateArticle, useDeleteArticle, getListArticlesQueryKey, useListTools, useCreateTool, useUpdateTool, useDeleteTool, getListToolsQueryKey } from "@workspace/api-client-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -14,15 +15,112 @@ import { RichEditor } from "@/components/rich-editor";
 import { useQueryClient } from "@tanstack/react-query";
 import { ImageUploadField } from "@/components/image-upload-field";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Edit, Trash, Plus, Search, ExternalLink } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { fetchAdminSession, loginAdmin, logoutAdmin } from "@/lib/admin-session";
+import { Edit, Trash, Plus, Search, ExternalLink, Lock } from "lucide-react";
 
 export function Admin() {
+  const [auth, setAuth] = useState<"loading" | "locked" | "open">("loading");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchAdminSession()
+      .then((ok) => {
+        if (!cancelled) setAuth(ok ? "open" : "locked");
+      })
+      .catch(() => {
+        if (!cancelled) setAuth("locked");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const handleLogin = async (event: FormEvent) => {
+    event.preventDefault();
+    setError("");
+    setSubmitting(true);
+    try {
+      const result = await loginAdmin(password);
+      if (result.ok) {
+        setPassword("");
+        setAuth("open");
+        return;
+      }
+      if (result.status === 503) {
+        setError("Defina ADMIN_PASSWORD no .env e reinicie a API.");
+      } else {
+        setError("Senha incorreta.");
+      }
+    } catch {
+      setError("Não foi possível validar a senha. A API está no ar?");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    await logoutAdmin();
+    setAuth("locked");
+  };
+
+  if (auth !== "open") {
+    return (
+      <Layout>
+        <div className="flex-1 p-4 md:p-8 w-full max-w-md mx-auto flex items-center">
+          <Card className="w-full bg-card/40 backdrop-blur border-primary/10">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 font-serif text-2xl text-primary">
+                <Lock className="w-5 h-5" />
+                Acesso restrito
+              </CardTitle>
+              <CardDescription>
+                Informe a senha do painel para gerenciar artigos e ferramentas.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {auth === "loading" ? (
+                <p className="text-sm text-muted-foreground">Verificando sessão...</p>
+              ) : (
+                <form onSubmit={handleLogin} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="admin-password">Senha</Label>
+                    <Input
+                      id="admin-password"
+                      type="password"
+                      autoComplete="current-password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                    />
+                  </div>
+                  {error ? <p className="text-sm text-destructive">{error}</p> : null}
+                  <Button type="submit" className="w-full" disabled={submitting || !password}>
+                    {submitting ? "Entrando..." : "Entrar"}
+                  </Button>
+                </form>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
       <div className="flex-1 p-4 md:p-8 w-full max-w-6xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-serif font-bold text-primary">Painel de Gerenciamento</h1>
-          <p className="text-muted-foreground">Gerencie artigos e sites adjacentes da wiki.</p>
+        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h1 className="text-3xl font-serif font-bold text-primary">Painel de Gerenciamento</h1>
+            <p className="text-muted-foreground">Gerencie artigos e sites adjacentes da wiki.</p>
+          </div>
+          <Button variant="outline" onClick={handleLogout}>
+            Sair
+          </Button>
         </div>
         <Tabs defaultValue="articles">
           <TabsList className="mb-6">

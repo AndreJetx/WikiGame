@@ -11,6 +11,7 @@ import {
   ListRecentArticlesQueryParams,
   SearchArticlesQueryParams,
 } from "@workspace/api-zod";
+import { requireAdmin } from "../middlewares/require-admin";
 
 const router = Router();
 
@@ -98,7 +99,7 @@ router.get("/articles/:slug", async (req, res) => {
   });
 });
 
-router.post("/articles", async (req, res) => {
+router.post("/articles", requireAdmin, async (req, res) => {
   const parsed = CreateArticleBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: "Invalid body" });
@@ -116,7 +117,7 @@ router.post("/articles", async (req, res) => {
   });
 });
 
-router.put("/articles/:slug", async (req, res) => {
+router.put("/articles/:slug", requireAdmin, async (req, res) => {
   const paramsParsed = UpdateArticleParams.safeParse(req.params);
   const bodyParsed = UpdateArticleBody.safeParse(req.body);
   if (!paramsParsed.success || !bodyParsed.success) {
@@ -141,7 +142,7 @@ router.put("/articles/:slug", async (req, res) => {
   });
 });
 
-router.delete("/articles/:slug", async (req, res) => {
+router.delete("/articles/:slug", requireAdmin, async (req, res) => {
   const parsed = DeleteArticleParams.safeParse(req.params);
   if (!parsed.success) {
     res.status(400).json({ error: "Invalid params" });
