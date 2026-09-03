@@ -10,6 +10,7 @@ import { Article } from "@/pages/article";
 import { Search } from "@/pages/search";
 import { Admin } from "@/pages/admin";
 import { Play } from "@/pages/play";
+import { Tools } from "@/pages/tools";
 
 const queryClient = new QueryClient();
 
@@ -22,6 +23,7 @@ function Router() {
       </Route>
       <Route path="/search" component={Search} />
       <Route path="/iniciar-jornada" component={Play} />
+      <Route path="/ferramentas" component={Tools} />
       <Route path="/gerenciamentoartigos" component={Admin} />
       <Route path="/admin">
         <Redirect to="/gerenciamentoartigos" />
