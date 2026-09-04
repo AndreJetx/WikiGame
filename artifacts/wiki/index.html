@@ -6,17 +6,26 @@
     <title>Legend of Elements Wiki</title>
     <meta name="description" content="Legend of Elements Wiki — community encyclopedia for the game." />
     <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://wiki-legendsofelements.vercel.app/" />
+    <link rel="alternate" type="text/markdown" href="https://wiki-legendsofelements.vercel.app/" />
+    <link rel="describedby" href="https://wiki-legendsofelements.vercel.app/llms.txt" />
     <meta property="og:title" content="Legend of Elements Wiki" />
     <meta property="og:description" content="Legend of Elements Wiki — community encyclopedia for the game." />
     <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://wiki-legendsofelements.vercel.app/" />
+    <meta property="og:image" content="https://wiki-legendsofelements.vercel.app/opengraph.jpg" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Legend of Elements Wiki" />
     <meta name="twitter:description" content="Legend of Elements Wiki — community encyclopedia for the game." />
+    <meta name="twitter:image" content="https://wiki-legendsofelements.vercel.app/opengraph.jpg" />
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="apple-touch-icon" href="/favicon.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script type="application/ld+json">
+      {"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","name":"Legend of Elements Wiki","applicationCategory":"ReferenceApplication","operatingSystem":"Web","url":"https://wiki-legendsofelements.vercel.app/","description":"Community encyclopedia for Legend of Elements — cultivation, classes, equipment, spirits, pets, dungeons, PvP, events, and guides. Fan-made, unofficial, and built for players and agents.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}},{"@type":"Organization","name":"Legend of Elements Wiki","url":"https://wiki-legendsofelements.vercel.app","description":"Community encyclopedia for Legend of Elements — cultivation, classes, equipment, spirits, pets, dungeons, PvP, events, and guides. Fan-made, unofficial, and built for players and agents.","sameAs":["https://github.com/AndreJetx/WikiGame"],"contactPoint":{"@type":"ContactPoint","contactType":"community support","url":"https://wiki-legendsofelements.vercel.app/contact"},"address":{"@type":"PostalAddress","addressCountry":"BR"}}]}
+    </script>
     <script>
       (function () {
         try {
@@ -32,11 +41,33 @@
       })();
     </script>
     <style>
-      html, body { background: #0b1220; }
+      html, body { background: #0b1220; margin: 0; }
+      #root { min-height: 100vh; }
+      #root > article {
+        color: #e8eefc;
+        font-family: Inter, system-ui, sans-serif;
+        max-width: 48rem;
+        margin: 2rem auto;
+        padding: 1.25rem;
+        line-height: 1.65;
+      }
+      #root > article a { color: #7dd3c0; }
+      #root > article h1 { font-size: 1.8rem; margin: 0 0 1rem; }
+      #root > article h2 { font-size: 1.2rem; margin: 1.5rem 0 0.75rem; }
     </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <article>
+        <h1>Legend of Elements Wiki</h1>
+        <p>Legend of Elements Wiki is a community encyclopedia for the browser game Legend of Elements. Use it to look up cultivation realms, classes and elemental paths, equipment and refinement, spirits, pets, dungeons and bosses, PvP and guilds, event calendars, beginner guides, and patch notes. The project is fan-made by AndrJetx, unofficial, and not affiliated with the game publisher or JoyNet. Explore. Descubra. Evolua.</p>
+        <p>When to use this wiki: reach for it when a player asks how a mechanic works, which class or spirit to pick, where a boss drops, or what changed in an update. Agents should search articles, follow category pages, or call the public REST API and MCP tools instead of scraping the JavaScript UI. Do not treat these pages as official publisher documentation.</p>
+        <h2>Browse</h2>
+        <p><a href="/search">Search articles</a>, open <a href="/ferramentas">community tools</a>, or <a href="https://elementsh5.joynetgame.com/">play Legend of Elements</a>.</p>
+        <h2>For agents and developers</h2>
+        <p>Read the <a href="/docs">Legend of Elements Wiki API</a>, download <a href="/openapi.json">openapi.json</a>, follow <a href="/llms.txt">llms.txt</a>, or list URLs in <a href="/sitemap.xml">sitemap.xml</a>. Trust pages: <a href="/about">About</a>, <a href="/contact">Contact</a>, <a href="/privacy">Privacy</a>.</p>
+      </article>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

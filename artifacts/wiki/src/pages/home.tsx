@@ -37,6 +37,10 @@ export function Home() {
           </div>
         </section>
 
+        <h1 className="text-3xl md:text-4xl font-serif font-bold text-primary">
+          Legend of Elements Wiki
+        </h1>
+
         {stats && (
           <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <Card className="bg-card/40 backdrop-blur border-primary/10">
@@ -180,7 +184,7 @@ export function Home() {
                       })()}
                     </div>
                     <div>
-                      <h4 className="font-medium text-foreground line-clamp-1 group-hover:text-primary transition-colors">{article.title}</h4>
+                      <h3 className="font-medium text-foreground line-clamp-1 group-hover:text-primary transition-colors">{article.title}</h3>
                       <p className="text-sm text-muted-foreground">Atualizado em {new Date(article.updatedAt).toLocaleDateString("pt-BR")}</p>
                     </div>
                     <CardClickHint />

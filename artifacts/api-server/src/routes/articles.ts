@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { db, articlesTable } from "@workspace/db";
-import { eq, ilike, or, sql, desc, and } from "drizzle-orm";
+import { eq, sql, desc } from "drizzle-orm";
 import {
   ListArticlesQueryParams,
   CreateArticleBody,
@@ -9,16 +9,22 @@ import {
   UpdateArticleBody,
   DeleteArticleParams,
   ListRecentArticlesQueryParams,
-  SearchArticlesQueryParams,
 } from "@workspace/api-zod";
 import { requireAdmin } from "../middlewares/require-admin";
+import { sendApiError } from "../lib/json-error";
 
 const router = Router();
 
 router.get("/articles", async (req, res) => {
   const parsed = ListArticlesQueryParams.safeParse(req.query);
   if (!parsed.success) {
-    res.status(400).json({ error: "Invalid query params" });
+    sendApiError(
+      res,
+      400,
+      "INVALID_PARAMS",
+      "Invalid query params",
+      "Use category, tag, limit, and offset as documented in /openapi.json",
+    );
     return;
   }
   const { category, tag, limit = 50, offset = 0 } = parsed.data;
@@ -74,7 +80,13 @@ router.get("/articles/recent", async (req, res) => {
 router.get("/articles/:slug", async (req, res) => {
   const parsed = GetArticleParams.safeParse(req.params);
   if (!parsed.success) {
-    res.status(400).json({ error: "Invalid params" });
+    sendApiError(
+      res,
+      400,
+      "INVALID_PARAMS",
+      "Invalid params",
+      "Provide a string slug as documented in /openapi.json",
+    );
     return;
   }
   const [article] = await db
@@ -82,7 +94,13 @@ router.get("/articles/:slug", async (req, res) => {
     .from(articlesTable)
     .where(eq(articlesTable.slug, parsed.data.slug));
   if (!article) {
-    res.status(404).json({ error: "Not found" });
+    sendApiError(
+      res,
+      404,
+      "NOT_FOUND",
+      "No article with that slug",
+      "GET /api/articles or GET /api/search?q= to find a valid slug",
+    );
     return;
   }
   // increment view count
@@ -102,7 +120,13 @@ router.get("/articles/:slug", async (req, res) => {
 router.post("/articles", requireAdmin, async (req, res) => {
   const parsed = CreateArticleBody.safeParse(req.body);
   if (!parsed.success) {
-    res.status(400).json({ error: "Invalid body" });
+    sendApiError(
+      res,
+      400,
+      "INVALID_BODY",
+      "Invalid body",
+      "Send ArticleInput JSON as documented in /openapi.json",
+    );
     return;
   }
   const [article] = await db
@@ -121,7 +145,13 @@ router.put("/articles/:slug", requireAdmin, async (req, res) => {
   const paramsParsed = UpdateArticleParams.safeParse(req.params);
   const bodyParsed = UpdateArticleBody.safeParse(req.body);
   if (!paramsParsed.success || !bodyParsed.success) {
-    res.status(400).json({ error: "Invalid request" });
+    sendApiError(
+      res,
+      400,
+      "INVALID_REQUEST",
+      "Invalid request",
+      "Check slug and ArticleUpdate fields in /openapi.json",
+    );
     return;
   }
   const updates = { ...bodyParsed.data, updatedAt: new Date() };
@@ -131,7 +161,13 @@ router.put("/articles/:slug", requireAdmin, async (req, res) => {
     .where(eq(articlesTable.slug, paramsParsed.data.slug))
     .returning();
   if (!article) {
-    res.status(404).json({ error: "Not found" });
+    sendApiError(
+      res,
+      404,
+      "NOT_FOUND",
+      "No article with that slug",
+      "GET /api/articles to list slugs before updating",
+    );
     return;
   }
   res.json({
@@ -145,7 +181,13 @@ router.put("/articles/:slug", requireAdmin, async (req, res) => {
 router.delete("/articles/:slug", requireAdmin, async (req, res) => {
   const parsed = DeleteArticleParams.safeParse(req.params);
   if (!parsed.success) {
-    res.status(400).json({ error: "Invalid params" });
+    sendApiError(
+      res,
+      400,
+      "INVALID_PARAMS",
+      "Invalid params",
+      "Provide a string slug as documented in /openapi.json",
+    );
     return;
   }
   await db.delete(articlesTable).where(eq(articlesTable.slug, parsed.data.slug));

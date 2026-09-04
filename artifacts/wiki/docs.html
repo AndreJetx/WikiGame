@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+    <title>Legend of Elements Wiki API</title>
+    <meta name="description" content="Legend of Elements Wiki API — public REST endpoints, OpenAPI, authentication, and MCP tools." />
+    <link rel="canonical" href="https://wiki-legendsofelements.vercel.app/docs" />
+    <link rel="alternate" type="text/markdown" href="https://wiki-legendsofelements.vercel.app/docs" />
+    <meta property="og:title" content="Legend of Elements Wiki API" />
+    <meta property="og:description" content="Public REST API, OpenAPI spec, and MCP server for Legend of Elements Wiki." />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://wiki-legendsofelements.vercel.app/opengraph.jpg" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <style>
+      html, body { background: #0b1220; margin: 0; }
+      #root { min-height: 100vh; }
+      #root > article {
+        color: #e8eefc;
+        font-family: Inter, system-ui, sans-serif;
+        max-width: 48rem;
+        margin: 2rem auto;
+        padding: 1.25rem;
+        line-height: 1.65;
+      }
+      #root > article a { color: #7dd3c0; }
+      #root > article h1 { font-size: 1.8rem; margin: 0 0 1rem; }
+      #root > article h2 { font-size: 1.2rem; margin: 1.5rem 0 0.75rem; }
+      #root > article code, #root > article pre { font-size: 0.9rem; }
+    </style>
+  </head>
+  <body>
+    <div id="root">
+      <article>
+        <h1>Legend of Elements Wiki API</h1>
+        <p>The Legend of Elements Wiki API is a public REST interface for encyclopedia data. Agents and apps should use it (or the MCP tools) instead of scraping the website. Base path: <a href="/api/healthz">/api</a>. OpenAPI 3.1: <a href="/openapi.json">/openapi.json</a> and <a href="/api/openapi.yaml">/api/openapi.yaml</a>.</p>
+        <h2>Authentication</h2>
+        <p>Read endpoints are unauthenticated: health, articles, featured and recent lists, article-by-slug, categories, search, stats, and tools. Create, update, and delete require a signed admin cookie (wiki_admin_session) obtained via POST /api/admin/login. If you are an agent integrating player-facing features, you only need the public GET methods.</p>
+        <h2>Example requests</h2>
+        <pre>curl https://wiki-legendsofelements.vercel.app/api/healthz
+curl "https://wiki-legendsofelements.vercel.app/api/search?q=cultivation"
+curl https://wiki-legendsofelements.vercel.app/openapi.json</pre>
+        <p>Errors are JSON objects with error.code, error.message, and error.hint. MCP Streamable HTTP lives at <a href="/mcp">/mcp</a> with discovery at <a href="/.well-known/mcp">/.well-known/mcp</a>. Agent index: <a href="/llms.txt">/llms.txt</a>.</p>
+      </article>
+    </div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

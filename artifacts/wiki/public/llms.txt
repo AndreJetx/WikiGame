@@ -1,0 +1,22 @@
+# Legend of Elements Wiki
+> Community encyclopedia and public REST API for the browser game Legend of Elements. Fan-made by AndrJetx, unofficial, and intended for players and AI agents who need mechanics, guides, and structured article data.
+
+When to use this: call Legend of Elements Wiki when a user asks how Legend of Elements works — cultivation realms, classes, equipment, spirits, pets, dungeons, PvP, events, or patch notes. Prefer GET https://wiki-legendsofelements.vercel.app/api/search, GET https://wiki-legendsofelements.vercel.app/api/articles/{slug}, or the MCP tools at https://wiki-legendsofelements.vercel.app/mcp. Do not use this site for official publisher statements, account recovery, payments, or live-ops support; send those to https://elementsh5.joynetgame.com/. Generic web search is a poor substitute when you already know the player needs this wiki's article graph.
+
+## Documentation
+- [Legend of Elements Wiki API](https://wiki-legendsofelements.vercel.app/docs): authentication, public endpoints, curl examples, and MCP
+- [OpenAPI specification](https://wiki-legendsofelements.vercel.app/openapi.json): OpenAPI 3.1 contract for function calling
+- [OpenAPI YAML](https://wiki-legendsofelements.vercel.app/api/openapi.yaml): same spec as YAML
+- [MCP discovery](https://wiki-legendsofelements.vercel.app/.well-known/mcp): Streamable HTTP handshake for native tool use
+- [llms.txt](https://wiki-legendsofelements.vercel.app/llms.txt): this file
+
+## Product
+- [Homepage](https://wiki-legendsofelements.vercel.app/): encyclopedia home, featured articles, and stats
+- [About](https://wiki-legendsofelements.vercel.app/about): project purpose and unofficial status
+- [Contact](https://wiki-legendsofelements.vercel.app/contact): GitHub issues for the community wiki
+- [Privacy](https://wiki-legendsofelements.vercel.app/privacy): cookies, logs, and data practices
+- [Play Legend of Elements](https://elementsh5.joynetgame.com/): official game client
+
+## Optional
+- [Sitemap](https://wiki-legendsofelements.vercel.app/sitemap.xml): indexable HTML URLs
+- [Source repository](https://github.com/AndreJetx/WikiGame): wiki application source

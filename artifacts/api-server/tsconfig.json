@@ -6,7 +6,11 @@
     "types": ["node"]
   },
   "include": ["src"],
+  "exclude": ["src/**/*.test.ts"],
   "references": [
+    {
+      "path": "../../lib/agent-site"
+    },
     {
       "path": "../../lib/db"
     },

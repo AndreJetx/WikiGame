@@ -3,9 +3,39 @@
   "installCommand": "pnpm install",
   "buildCommand": "pnpm --filter @workspace/api-server build && pnpm --filter @workspace/wiki build",
   "outputDirectory": "artifacts/wiki/dist/public",
+  "cleanUrls": true,
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "Vary", "value": "Accept, Accept-Encoding" }
+      ]
+    }
+  ],
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api" },
-    { "source": "/((?!api/).*)", "destination": "/index.html" }
+    { "source": "/openapi.json", "destination": "/api/openapi.json" },
+    { "source": "/openapi.yaml", "destination": "/api/openapi.yaml" },
+    { "source": "/sitemap.xml", "destination": "/api/sitemap.xml" },
+    { "source": "/mcp", "destination": "/api/mcp" },
+    { "source": "/.well-known/mcp", "destination": "/api/well-known/mcp" },
+    {
+      "source": "/",
+      "has": [{ "type": "header", "key": "accept", "value": "(.*)text/markdown(.*)" }],
+      "destination": "/api/markdown"
+    },
+    {
+      "source": "/:path*",
+      "has": [{ "type": "header", "key": "accept", "value": "(.*)text/markdown(.*)" }],
+      "destination": "/api/markdown/:path*"
+    },
+    { "source": "/wiki", "destination": "/index.html" },
+    { "source": "/wiki/:path*", "destination": "/index.html" },
+    { "source": "/search", "destination": "/index.html" },
+    { "source": "/iniciar-jornada", "destination": "/index.html" },
+    { "source": "/ferramentas", "destination": "/index.html" },
+    { "source": "/gerenciamentoartigos", "destination": "/index.html" },
+    { "source": "/admin", "destination": "/index.html" }
   ],
   "functions": {
     "api/index.mjs": {

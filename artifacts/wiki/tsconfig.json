@@ -16,6 +16,9 @@
   },
   "references": [
     {
+      "path": "../../lib/agent-site"
+    },
+    {
       "path": "../../lib/api-client-react"
     }
   ]

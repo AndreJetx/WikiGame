@@ -2,13 +2,20 @@ import { Router } from "express";
 import { db, articlesTable } from "@workspace/db";
 import { ilike, or, eq, and, desc } from "drizzle-orm";
 import { SearchArticlesQueryParams } from "@workspace/api-zod";
+import { sendApiError } from "../lib/json-error";
 
 const router = Router();
 
 router.get("/search", async (req, res) => {
   const parsed = SearchArticlesQueryParams.safeParse(req.query);
   if (!parsed.success) {
-    res.status(400).json({ error: "Invalid query params" });
+    sendApiError(
+      res,
+      400,
+      "INVALID_PARAMS",
+      "Invalid query params",
+      "Pass required q and optional category as documented in /openapi.json",
+    );
     return;
   }
   const { q, category } = parsed.data;

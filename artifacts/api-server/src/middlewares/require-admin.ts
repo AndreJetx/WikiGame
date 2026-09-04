@@ -1,13 +1,26 @@
 import type { Request, Response, NextFunction } from "express";
 import { getAdminPassword, isAdminRequest } from "../lib/admin-auth";
+import { sendApiError } from "../lib/json-error";
 
 export function requireAdmin(req: Request, res: Response, next: NextFunction) {
   if (!getAdminPassword()) {
-    res.status(503).json({ error: "Admin password is not configured" });
+    sendApiError(
+      res,
+      503,
+      "ADMIN_NOT_CONFIGURED",
+      "Admin password is not configured",
+      "Set ADMIN_PASSWORD on the server or use public GET endpoints only",
+    );
     return;
   }
   if (!isAdminRequest(req)) {
-    res.status(401).json({ error: "Unauthorized" });
+    sendApiError(
+      res,
+      401,
+      "UNAUTHORIZED",
+      "Admin session required",
+      "POST /api/admin/login with { password } then retry with the wiki_admin_session cookie",
+    );
     return;
   }
   next();

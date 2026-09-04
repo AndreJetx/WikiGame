@@ -11,6 +11,10 @@ import { Search } from "@/pages/search";
 import { Admin } from "@/pages/admin";
 import { Play } from "@/pages/play";
 import { Tools } from "@/pages/tools";
+import { About } from "@/pages/about";
+import { Contact } from "@/pages/contact";
+import { Privacy } from "@/pages/privacy";
+import { Docs } from "@/pages/docs";
 
 const queryClient = new QueryClient();
 
@@ -24,6 +28,10 @@ function Router() {
       <Route path="/search" component={Search} />
       <Route path="/iniciar-jornada" component={Play} />
       <Route path="/ferramentas" component={Tools} />
+      <Route path="/about" component={About} />
+      <Route path="/contact" component={Contact} />
+      <Route path="/privacy" component={Privacy} />
+      <Route path="/docs" component={Docs} />
       <Route path="/gerenciamentoartigos" component={Admin} />
       <Route path="/admin">
         <Redirect to="/gerenciamentoartigos" />

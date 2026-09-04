@@ -4,6 +4,9 @@
   "files": [],
   "references": [
     {
+      "path": "./lib/agent-site"
+    },
+    {
       "path": "./lib/db"
     },
     {

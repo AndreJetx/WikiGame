@@ -8,6 +8,7 @@ import {
   UpdateToolParams,
 } from "@workspace/api-zod";
 import { requireAdmin } from "../middlewares/require-admin";
+import { sendApiError } from "../lib/json-error";
 
 const router = Router();
 
@@ -30,7 +31,13 @@ router.get("/tools", async (_req, res) => {
 router.post("/tools", requireAdmin, async (req, res) => {
   const parsed = CreateToolBody.safeParse(req.body);
   if (!parsed.success) {
-    res.status(400).json({ error: "Invalid body" });
+    sendApiError(
+      res,
+      400,
+      "INVALID_BODY",
+      "Invalid body",
+      "Send ToolInput JSON as documented in /openapi.json",
+    );
     return;
   }
 
@@ -63,7 +70,13 @@ router.put("/tools/:id", requireAdmin, async (req, res) => {
   const paramsParsed = UpdateToolParams.safeParse(req.params);
   const bodyParsed = UpdateToolBody.safeParse(req.body);
   if (!paramsParsed.success || !bodyParsed.success) {
-    res.status(400).json({ error: "Invalid request" });
+    sendApiError(
+      res,
+      400,
+      "INVALID_REQUEST",
+      "Invalid request",
+      "Check id and ToolUpdate fields in /openapi.json",
+    );
     return;
   }
 
@@ -88,7 +101,13 @@ router.put("/tools/:id", requireAdmin, async (req, res) => {
     .returning();
 
   if (!tool) {
-    res.status(404).json({ error: "Not found" });
+    sendApiError(
+      res,
+      404,
+      "NOT_FOUND",
+      "No tool with that id",
+      "GET /api/tools to list ids",
+    );
     return;
   }
   res.json(serializeTool(tool));
@@ -97,7 +116,13 @@ router.put("/tools/:id", requireAdmin, async (req, res) => {
 router.delete("/tools/:id", requireAdmin, async (req, res) => {
   const parsed = DeleteToolParams.safeParse(req.params);
   if (!parsed.success) {
-    res.status(400).json({ error: "Invalid params" });
+    sendApiError(
+      res,
+      400,
+      "INVALID_PARAMS",
+      "Invalid params",
+      "Provide a numeric tool id as documented in /openapi.json",
+    );
     return;
   }
   await db.delete(toolsTable).where(eq(toolsTable.id, parsed.data.id));
