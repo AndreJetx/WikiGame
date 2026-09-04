@@ -1,7 +1,11 @@
 {
   "extends": "./tsconfig.base.json",
   "compileOnSave": false,
-  "files": [],
+  "compilerOptions": {
+    "lib": ["es2022", "DOM"],
+    "noEmit": true
+  },
+  "files": ["middleware.ts"],
   "references": [
     {
       "path": "./lib/agent-site"

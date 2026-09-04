@@ -1,3 +1,7 @@
+/// <reference lib="dom" />
+/// <reference lib="dom.iterable" />
+/// <reference lib="es2022" />
+
 import { next, rewrite } from "@vercel/functions";
 import {
   HTML_CONTENT_TYPE,
@@ -11,6 +15,7 @@ import {
 } from "@workspace/agent-site";
 
 export const config = {
+  runtime: "nodejs",
   matcher: ["/((?!api/|assets/|fonts/).*)"],
 };
 
