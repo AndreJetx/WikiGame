@@ -90,12 +90,12 @@ function negotiateAccept(header: string | null): "markdown" | "html" | "not_acce
   }
   offers.sort((a, b) => b.q - a.q || b.specificity - a.specificity || a.index - b.index);
 
+  // Never treat bare */* as a specific type match (image requests send */* too).
   const matches = (
     offer: { type: string; subtype: string },
     type: string,
     subtype: string,
   ) =>
-    (offer.type === "*" && offer.subtype === "*") ||
     (offer.type === type && offer.subtype === "*") ||
     (offer.type === type && offer.subtype === subtype);
 
@@ -103,6 +103,7 @@ function negotiateAccept(header: string | null): "markdown" | "html" | "not_acce
     if (matches(offer, "text", "markdown")) return "markdown";
     if (matches(offer, "text", "html")) return "html";
     if (matches(offer, "application", "xhtml+xml")) return "html";
+    if (offer.type === "*" && offer.subtype === "*") return "html";
   }
   return "not_acceptable";
 }
@@ -131,12 +132,23 @@ function handle(request: Request): Response {
   const pathname = normalizePathname(new URL(request.url).pathname);
   const lastSegment = pathname.split("/").pop() ?? "";
   const looksLikeFile = lastSegment.includes(".");
-  const negotiation = negotiateAccept(request.headers.get("accept"));
   const vary = new Headers({ Vary: VARY_ACCEPT });
 
   if (pathname === "/api" || pathname.startsWith("/api/")) {
     return continueRequest(vary);
   }
+
+  // Serve static assets before Accept negotiation (browsers send image/*,*/* for favicons).
+  if (
+    STATIC_FILES.has(pathname) ||
+    looksLikeFile ||
+    pathname.startsWith("/assets/") ||
+    pathname.startsWith("/fonts/")
+  ) {
+    return continueRequest(vary);
+  }
+
+  const negotiation = negotiateAccept(request.headers.get("accept"));
 
   if (negotiation === "not_acceptable") {
     vary.set("Content-Type", "text/plain; charset=utf-8");
@@ -149,7 +161,7 @@ function handle(request: Request): Response {
     return rewriteRequest(destination, vary);
   }
 
-  if (!looksLikeFile && !isKnownPath(pathname)) {
+  if (!isKnownPath(pathname)) {
     vary.set("Content-Type", HTML_CONTENT_TYPE);
     return new Response(notFoundHtml(), { status: 404, headers: vary });
   }

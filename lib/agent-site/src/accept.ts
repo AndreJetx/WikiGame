@@ -37,8 +37,9 @@ function parseAcceptList(header: string): AcceptOffer[] {
   return offers;
 }
 
+/** Match type/subtype or type/* — never bare star/star (browsers use that for images too). */
 function matches(offer: AcceptOffer, type: string, subtype: string): boolean {
-  if (offer.type === "*" && offer.subtype === "*") return true;
+  if (offer.type === "*" && offer.subtype === "*") return false;
   if (offer.type === type && offer.subtype === "*") return true;
   return offer.type === type && offer.subtype === subtype;
 }
@@ -54,6 +55,8 @@ export function negotiateAccept(header: string | undefined | null): NegotiatedTy
     if (matches(offer, "text", "markdown")) return "markdown";
     if (matches(offer, "text", "html")) return "html";
     if (matches(offer, "application", "xhtml+xml")) return "html";
+    // */* means "anything" — default to HTML, not markdown
+    if (offer.type === "*" && offer.subtype === "*") return "html";
   }
 
   return "not_acceptable";

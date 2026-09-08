@@ -29,13 +29,13 @@
       "has": [{ "type": "header", "key": "accept", "value": "(.*)text/markdown(.*)" }],
       "destination": "/api/markdown/:path*"
     },
-    { "source": "/wiki", "destination": "/index.html" },
-    { "source": "/wiki/:path*", "destination": "/index.html" },
-    { "source": "/search", "destination": "/index.html" },
-    { "source": "/iniciar-jornada", "destination": "/index.html" },
-    { "source": "/ferramentas", "destination": "/index.html" },
-    { "source": "/gerenciamentoartigos", "destination": "/index.html" },
-    { "source": "/admin", "destination": "/index.html" }
+    { "source": "/wiki", "destination": "/index" },
+    { "source": "/wiki/:path*", "destination": "/index" },
+    { "source": "/search", "destination": "/index" },
+    { "source": "/iniciar-jornada", "destination": "/index" },
+    { "source": "/ferramentas", "destination": "/index" },
+    { "source": "/gerenciamentoartigos", "destination": "/index" },
+    { "source": "/admin", "destination": "/index" }
   ],
   "functions": {
     "api/index.mjs": {

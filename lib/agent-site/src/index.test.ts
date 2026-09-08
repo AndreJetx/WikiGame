@@ -29,6 +29,13 @@ describe("negotiateAccept", () => {
     expect(negotiateAccept(undefined)).toBe("html");
   });
 
+  it("does not treat image Accept */* as markdown", () => {
+    expect(
+      negotiateAccept("image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8"),
+    ).toBe("html");
+    expect(negotiateAccept("*/*")).toBe("html");
+  });
+
   it("returns 406 when no supported type is offered", () => {
     expect(negotiateAccept("application/xml")).toBe("not_acceptable");
   });
