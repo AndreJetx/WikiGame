@@ -24,6 +24,7 @@ describe("crawlable HTML", () => {
     expect(html).toContain('lang="pt-BR"');
     expect(html).toContain('rel="canonical"');
     expect(html).toContain('property="og:image"');
+    expect(html).toContain("https://wiki-legendsofelements.vercel.app/og.jpg");
     expect(html).toContain('property="og:type"');
     expect(html).toContain("application/ld+json");
     expect(html).toContain("SoftwareApplication");

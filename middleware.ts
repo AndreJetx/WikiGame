@@ -28,6 +28,7 @@ const STATIC_FILES = new Set([
   "/robots.txt",
   "/llms.txt",
   "/opengraph.jpg",
+  "/og.jpg",
   "/openapi.json",
   "/openapi.yaml",
   "/sitemap.xml",
