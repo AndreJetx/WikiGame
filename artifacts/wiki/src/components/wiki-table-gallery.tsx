@@ -1,5 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeftRight, ChevronLeft, ChevronRight, LayoutGrid } from "lucide-react";
+import {
+  ArrowLeftRight,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  LayoutGrid,
+} from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -9,6 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { CardClickHint } from "@/components/card-click-hint";
 
 type WikiTableCell = {
@@ -144,6 +151,99 @@ function injectHeadingIds(html: string): { html: string; headings: ArticleHeadin
   });
 
   return { html: container.innerHTML, headings };
+}
+
+type H1Section = {
+  id: string;
+  titleHtml: string;
+  titleText: string;
+  children: ArticleBlock[];
+};
+
+type GroupedArticle = {
+  preamble: ArticleBlock[];
+  sections: H1Section[];
+};
+
+function serializeNodes(nodes: ChildNode[]) {
+  return nodes
+    .map((node) => {
+      if (node.nodeType === Node.ELEMENT_NODE) return (node as Element).outerHTML;
+      return node.textContent ?? "";
+    })
+    .join("");
+}
+
+function pushHtmlBlock(target: ArticleBlock[], html: string) {
+  if (html.trim()) target.push({ type: "html", html });
+}
+
+/** Group article blocks into optional preamble + H1 sections (content until next H1). */
+export function groupBlocksByH1(blocks: ArticleBlock[]): GroupedArticle {
+  const preamble: ArticleBlock[] = [];
+  const sections: H1Section[] = [];
+  let current: H1Section | null = null;
+
+  const appendBlock = (block: ArticleBlock) => {
+    if (current) current.children.push(block);
+    else preamble.push(block);
+  };
+
+  for (const block of blocks) {
+    if (block.type === "table") {
+      appendBlock(block);
+      continue;
+    }
+
+    const container = document.createElement("div");
+    container.innerHTML = block.html;
+    let buffer: ChildNode[] = [];
+
+    const flushBuffer = () => {
+      const html = serializeNodes(buffer);
+      buffer = [];
+      if (!html.trim()) return;
+      if (current) pushHtmlBlock(current.children, html);
+      else pushHtmlBlock(preamble, html);
+    };
+
+    for (const node of [...container.childNodes]) {
+      const isH1 =
+        node.nodeType === Node.ELEMENT_NODE &&
+        (node as Element).tagName === "H1" &&
+        !(node as Element).closest("table");
+
+      if (!isH1) {
+        buffer.push(node);
+        continue;
+      }
+
+      flushBuffer();
+      const heading = node as HTMLElement;
+      const titleText = (heading.textContent || "").replace(/\s+/g, " ").trim();
+      current = {
+        id: heading.id || slugifyHeading(titleText || "secao", new Set(sections.map((s) => s.id))),
+        titleHtml: heading.innerHTML,
+        titleText,
+        children: [],
+      };
+      sections.push(current);
+    }
+
+    flushBuffer();
+  }
+
+  return { preamble, sections };
+}
+
+function renderArticleBlocks(blocks: ArticleBlock[], keyPrefix: string) {
+  return blocks.map((block, index) =>
+    block.type === "html" ? (
+      <div key={`${keyPrefix}-html-${index}`} dangerouslySetInnerHTML={{ __html: block.html }} />
+    ) : (
+      <WikiTableGallery key={`${keyPrefix}-table-${index}`} table={block.table} />
+    ),
+  );
 }
 
 const LAYOUT_KEY = "wiki-table-layout";
@@ -511,22 +611,55 @@ export function WikiTableGallery({ table }: { table: WikiTableData }) {
 }
 
 export function ArticleBody({ html }: { html: string }) {
-  const { blocks, headings } = useMemo(() => {
+  const { headings, preamble, sections } = useMemo(() => {
     const prepared = injectHeadingIds(html);
+    const blocks = parseArticleBlocks(prepared.html);
+    const grouped = groupBlocksByH1(blocks);
     return {
-      blocks: parseArticleBlocks(prepared.html),
       headings: prepared.headings,
+      preamble: grouped.preamble,
+      sections: grouped.sections,
     };
   }, [html]);
 
+  const [openById, setOpenById] = useState<Record<string, boolean>>({});
+
+  const isSectionOpen = useCallback(
+    (id: string) => openById[id] !== false,
+    [openById],
+  );
+
   useEffect(() => {
-    const hash = window.location.hash.replace(/^#/, "");
-    if (!hash) return;
-    const target = document.getElementById(hash);
-    if (!target) return;
-    const top = target.getBoundingClientRect().top + window.scrollY - 88;
-    window.scrollTo({ top, behavior: "smooth" });
+    setOpenById({});
   }, [html]);
+
+  useEffect(() => {
+    const scrollToHash = () => {
+      const hash = window.location.hash.replace(/^#/, "");
+      if (!hash) return;
+
+      const owner = sections.find((section) => section.id === hash);
+      if (owner) {
+        setOpenById((prev) =>
+          prev[owner.id] === false ? { ...prev, [owner.id]: true } : prev,
+        );
+      }
+
+      const runScroll = () => {
+        const target = document.getElementById(hash);
+        if (!target) return;
+        const top = target.getBoundingClientRect().top + window.scrollY - 88;
+        window.scrollTo({ top, behavior: "smooth" });
+      };
+
+      // Wait a frame so a just-opened section is in the layout before scrolling.
+      requestAnimationFrame(() => requestAnimationFrame(runScroll));
+    };
+
+    scrollToHash();
+    window.addEventListener("hashchange", scrollToHash);
+    return () => window.removeEventListener("hashchange", scrollToHash);
+  }, [html, sections]);
 
   return (
     <>
@@ -543,13 +676,40 @@ export function ArticleBody({ html }: { html: string }) {
         </nav>
       ) : null}
       <div className="tiptap-content">
-        {blocks.map((block, index) =>
-          block.type === "html" ? (
-            <div key={index} dangerouslySetInnerHTML={{ __html: block.html }} />
-          ) : (
-            <WikiTableGallery key={index} table={block.table} />
-          ),
-        )}
+        {renderArticleBlocks(preamble, "preamble")}
+        {sections.map((section) => (
+          <Collapsible
+            key={section.id}
+            open={isSectionOpen(section.id)}
+            onOpenChange={(open) =>
+              setOpenById((prev) => ({ ...prev, [section.id]: open }))
+            }
+            className="article-h1-section"
+          >
+            <h1 id={section.id} className="article-h1-heading">
+              <CollapsibleTrigger asChild>
+                <button
+                  type="button"
+                  className="article-h1-trigger"
+                  aria-label={
+                    isSectionOpen(section.id)
+                      ? `Recolher ${section.titleText}`
+                      : `Expandir ${section.titleText}`
+                  }
+                >
+                  <span
+                    className="article-h1-title"
+                    dangerouslySetInnerHTML={{ __html: section.titleHtml }}
+                  />
+                  <ChevronDown className="article-h1-chevron" aria-hidden />
+                </button>
+              </CollapsibleTrigger>
+            </h1>
+            <CollapsibleContent className="article-h1-content">
+              {renderArticleBlocks(section.children, section.id)}
+            </CollapsibleContent>
+          </Collapsible>
+        ))}
       </div>
     </>
   );
