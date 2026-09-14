@@ -1,5 +1,4 @@
 import { ReactNode, useEffect, useState } from "react";
-import { Link } from "wouter";
 import { Navbar } from "./navbar";
 import footerArt from "@assets/andrjetx-footer.jpg";
 
@@ -77,12 +76,6 @@ export function Layout({
               <p>Legend of Elements Wiki &copy; {new Date().getFullYear()}</p>
               <p className="mt-1 text-foreground/85">
                 Feito por AndrJetx — O Free, para jogadores, sem fontes oficiais envolvidas.
-              </p>
-              <p className="mt-2 flex flex-wrap gap-x-3 gap-y-1">
-                <Link href="/docs" className="hover:text-primary">Docs</Link>
-                <Link href="/about" className="hover:text-primary">About</Link>
-                <Link href="/contact" className="hover:text-primary">Contact</Link>
-                <Link href="/privacy" className="hover:text-primary">Privacy</Link>
               </p>
             </div>
             <img
