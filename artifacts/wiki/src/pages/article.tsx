@@ -50,7 +50,7 @@ export function Article() {
           <motion.article
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="prose prose-stone dark:prose-invert prose-headings:font-serif prose-h1:text-4xl prose-h1:text-primary prose-a:text-primary prose-th:bg-muted/50 prose-td:border prose-td:border-border prose-th:border prose-th:border-border max-w-none"
+            className="prose prose-stone dark:prose-invert prose-headings:font-serif prose-h1:text-4xl prose-h1:text-primary prose-a:text-primary prose-strong:text-inherit prose-th:bg-muted/50 prose-td:border prose-td:border-border prose-th:border prose-th:border-border max-w-none"
           >
             <h1 className="mb-4">{article.title}</h1>
 

@@ -434,7 +434,7 @@ export function RichEditor({ value, onChange, placeholder, className, excludeSlu
     },
     editorProps: {
       attributes: {
-        class: "prose prose-stone dark:prose-invert prose-headings:font-serif prose-h1:text-primary max-w-none min-h-[300px] p-4 focus:outline-none"
+        class: "prose prose-stone dark:prose-invert prose-headings:font-serif prose-h1:text-primary prose-strong:text-inherit max-w-none min-h-[300px] p-4 focus:outline-none"
       },
       handleDOMEvents: {
         mousemove(view, event) {
