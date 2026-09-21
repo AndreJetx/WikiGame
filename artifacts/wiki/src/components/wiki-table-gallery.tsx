@@ -17,6 +17,8 @@ import { Button } from "@/components/ui/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { CardClickHint } from "@/components/card-click-hint";
+import { useLocation } from "wouter";
+import { handleWikiContentClick } from "@/lib/wiki-links";
 
 type WikiTableCell = {
   html: string;
@@ -236,10 +238,21 @@ export function groupBlocksByH1(blocks: ArticleBlock[]): GroupedArticle {
   return { preamble, sections };
 }
 
+function WikiHtml({ html, className }: { html: string; className?: string }) {
+  const [, setLocation] = useLocation();
+  return (
+    <div
+      className={className}
+      dangerouslySetInnerHTML={{ __html: html }}
+      onClick={(event) => handleWikiContentClick(event, setLocation)}
+    />
+  );
+}
+
 function renderArticleBlocks(blocks: ArticleBlock[], keyPrefix: string) {
   return blocks.map((block, index) =>
     block.type === "html" ? (
-      <div key={`${keyPrefix}-html-${index}`} dangerouslySetInnerHTML={{ __html: block.html }} />
+      <WikiHtml key={`${keyPrefix}-html-${index}`} html={block.html} />
     ) : (
       <WikiTableGallery key={`${keyPrefix}-table-${index}`} table={block.table} />
     ),
@@ -292,6 +305,7 @@ function WikiCardList({
   const trackRef = useRef<HTMLDivElement>(null);
   const [page, setPage] = useState(0);
   const items = table.rows.filter((row) => row[0]);
+  const [, setLocation] = useLocation();
 
   return (
     <div className="wiki-table-stack-list">
@@ -312,7 +326,13 @@ function WikiCardList({
             key={index}
             type="button"
             className="wiki-table-card wiki-table-card-list"
-            onClick={() => onOpen(index)}
+            onClick={(event) => {
+              if (handleWikiContentClick(event, setLocation)) {
+                event.stopPropagation();
+                return;
+              }
+              onOpen(index);
+            }}
           >
             <div
               className="wiki-table-card-body"
@@ -440,6 +460,7 @@ export function WikiTableGallery({ table }: { table: WikiTableData }) {
   const { layout, choose, showStack } = useGalleryLayout();
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [direction, setDirection] = useState<"next" | "prev" | "none">("none");
+  const [, setLocation] = useLocation();
   const total = table.rows.length;
   const selected = selectedIndex === null ? null : table.rows[selectedIndex];
   const extraCells = selected?.slice(1) ?? [];
@@ -524,7 +545,11 @@ export function WikiTableGallery({ table }: { table: WikiTableData }) {
                 key={index}
                 type="button"
                 className="wiki-table-card"
-                onClick={() => {
+                onClick={(event) => {
+                  if (handleWikiContentClick(event, setLocation)) {
+                    event.stopPropagation();
+                    return;
+                  }
                   setDirection("none");
                   setSelectedIndex(index);
                 }}
@@ -570,9 +595,9 @@ export function WikiTableGallery({ table }: { table: WikiTableData }) {
                 </DialogHeader>
                 <div className="wiki-table-modal space-y-4">
                   {selected[0]?.html ? (
-                    <div
+                    <WikiHtml
                       className="wiki-table-modal-preview"
-                      dangerouslySetInnerHTML={{ __html: selected[0].html }}
+                      html={selected[0].html}
                     />
                   ) : null}
                   {extraCells.map((cell, index) => {
@@ -581,7 +606,7 @@ export function WikiTableGallery({ table }: { table: WikiTableData }) {
                     return (
                       <section key={index} className="wiki-table-modal-field">
                         {label ? <h3>{label}</h3> : null}
-                        <div dangerouslySetInnerHTML={{ __html: cell.html }} />
+                        <WikiHtml html={cell.html} />
                       </section>
                     );
                   })}
@@ -623,6 +648,7 @@ export function ArticleBody({ html }: { html: string }) {
   }, [html]);
 
   const [openById, setOpenById] = useState<Record<string, boolean>>({});
+  const [, setLocation] = useLocation();
 
   const isSectionOpen = useCallback(
     (id: string) => openById[id] !== false,
@@ -675,7 +701,7 @@ export function ArticleBody({ html }: { html: string }) {
           </ol>
         </nav>
       ) : null}
-      <div className="tiptap-content">
+      <div className="tiptap-content" onClick={(event) => handleWikiContentClick(event, setLocation)}>
         {renderArticleBlocks(preamble, "preamble")}
         {sections.map((section) => (
           <Collapsible

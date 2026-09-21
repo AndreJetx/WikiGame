@@ -327,6 +327,7 @@ function GerenciamentoArtigos() {
                     value={formData.content}
                     onChange={(html) => setFormData({...formData, content: html})}
                     placeholder="Escreva o conteúdo do artigo..."
+                    excludeSlug={editingSlug || formData.slug}
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">

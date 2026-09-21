@@ -656,6 +656,10 @@ a:hover .card-click-plus,
 .tiptap-content a {
   color: hsl(var(--primary));
   text-decoration: underline;
+  cursor: pointer;
+}
+.tiptap-content a:hover {
+  color: hsl(var(--primary) / 0.85);
 }
 .tiptap-content hr {
   border: none;

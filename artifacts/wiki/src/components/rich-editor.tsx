@@ -12,7 +12,7 @@ import Underline from "@tiptap/extension-underline";
 import Placeholder from "@tiptap/extension-placeholder";
 import { Color } from "@tiptap/extension-color";
 import { TextStyle } from "@tiptap/extension-text-style";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -26,17 +26,21 @@ import {
   Undo, Redo, Trash2, Loader2,
   BetweenHorizontalStart, BetweenHorizontalEnd,
   BetweenVerticalStart, BetweenVerticalEnd,
-  Rows3, Columns3, Baseline,
+  Rows3, Columns3, Baseline, BookMarked,
 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { uploadImageToCloudinary, isCloudinaryConfigured } from "@/lib/cloudinary";
+import { getListArticlesQueryKey, useListArticles, type Article } from "@workspace/api-client-react";
+import { CATEGORIES } from "@/components/sidebar";
+import { wikiArticleHref } from "@/lib/wiki-links";
 
 interface RichEditorProps {
   value: string;
   onChange: (html: string) => void;
   placeholder?: string;
   className?: string;
+  excludeSlug?: string;
 }
 
 const TABLE_GRID_MAX = 8;
@@ -339,10 +343,29 @@ function updateRowHeightFromCell(view: { posAtDOM: (node: Node, offset: number) 
   }
 }
 
-export function RichEditor({ value, onChange, placeholder, className }: RichEditorProps) {
+function categoryLabel(slug: string) {
+  return CATEGORIES.find((category) => category.slug === slug)?.name ?? slug;
+}
+
+function matchesArticleQuery(article: Article, query: string) {
+  if (!query) return true;
+  const normalized = query
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+  const haystack = `${article.title} ${article.slug} ${article.category} ${article.excerpt}`
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+  return haystack.includes(normalized);
+}
+
+export function RichEditor({ value, onChange, placeholder, className, excludeSlug }: RichEditorProps) {
   const [imageUrl, setImageUrl] = useState("");
   const [videoUrl, setVideoUrl] = useState("");
   const [linkUrl, setLinkUrl] = useState("");
+  const [articleQuery, setArticleQuery] = useState("");
+  const [linkOpen, setLinkOpen] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [tableMenuOpen, setTableMenuOpen] = useState(false);
@@ -354,6 +377,16 @@ export function RichEditor({ value, onChange, placeholder, className }: RichEdit
     startHeight: number;
     cell: HTMLElement;
   } | null>(null);
+
+  const { data: citeArticles, isLoading: isLoadingCiteArticles } = useListArticles(
+    { limit: 200 },
+    { query: { enabled: linkOpen, queryKey: getListArticlesQueryKey({ limit: 200 }) } },
+  );
+
+  const filteredCiteArticles = useMemo(() => {
+    const list = (citeArticles ?? []).filter((article) => article.slug !== excludeSlug);
+    return list.filter((article) => matchesArticleQuery(article, articleQuery)).slice(0, 12);
+  }, [articleQuery, citeArticles, excludeSlug]);
 
   const editor = useEditor({
     extensions: [
@@ -371,7 +404,17 @@ export function RichEditor({ value, onChange, placeholder, className }: RichEdit
       AlignedTableHeader,
       AlignedTableCell,
       Youtube.configure({ width: 640, height: 360, HTMLAttributes: { class: "w-full aspect-video rounded-lg my-4" } }),
-      Link.configure({ openOnClick: false, HTMLAttributes: { class: "text-primary underline" } }),
+      Link.configure({
+        openOnClick: false,
+        autolink: true,
+        defaultProtocol: "https",
+        HTMLAttributes: {
+          class: "text-primary underline",
+          rel: "noopener noreferrer",
+          target: null,
+        },
+        isAllowedUri: (url) => Boolean(url) && !/^javascript:/i.test(url),
+      }),
       TextStyle,
       Color,
       TextAlign.configure({ types: ["heading", "paragraph", "tableCell", "tableHeader"] }),
@@ -486,9 +529,46 @@ export function RichEditor({ value, onChange, placeholder, className }: RichEdit
     if (linkUrl.trim()) {
       editor.chain().focus().setLink({ href: linkUrl.trim() }).run();
       setLinkUrl("");
+      setLinkOpen(false);
     } else {
       editor.chain().focus().unsetLink().run();
     }
+  };
+
+  const citeArticle = (article: Article) => {
+    const href = wikiArticleHref(article.category, article.slug);
+    const { empty } = editor.state.selection;
+    if (empty) {
+      editor
+        .chain()
+        .focus()
+        .insertContent([
+          {
+            type: "text",
+            text: article.title,
+            marks: [{ type: "link", attrs: { href } }],
+          },
+          { type: "text", text: " " },
+        ])
+        .run();
+    } else {
+      editor.chain().focus().extendMarkRange("link").setLink({ href }).run();
+    }
+    setArticleQuery("");
+    setLinkUrl("");
+    setLinkOpen(false);
+  };
+
+  const openLinkMenu = (open: boolean) => {
+    setLinkOpen(open);
+    if (!open) return;
+    const selected = editor.state.doc.textBetween(
+      editor.state.selection.from,
+      editor.state.selection.to,
+      " ",
+    );
+    setArticleQuery(selected.trim());
+    setLinkUrl(editor.getAttributes("link").href ?? "");
   };
 
   const insertTable = (rows: number, cols: number, withHeaderRow: boolean) => {
@@ -662,18 +742,57 @@ export function RichEditor({ value, onChange, placeholder, className }: RichEdit
             <Button size="sm" onClick={insertVideo} className="w-full">Inserir</Button>
           </PopoverContent>
         </Popover>
-        <Popover>
+        <Popover open={linkOpen} onOpenChange={openLinkMenu}>
           <PopoverTrigger asChild>
-            <button type="button" title="Insert link" className={cn("p-1.5 rounded hover:bg-primary/20 transition-colors", editor.isActive("link") ? "bg-primary/30 text-primary" : "text-muted-foreground hover:text-foreground")}>
+            <button type="button" title="Citar artigo ou inserir link" className={cn("p-1.5 rounded hover:bg-primary/20 transition-colors", editor.isActive("link") ? "bg-primary/30 text-primary" : "text-muted-foreground hover:text-foreground")}>
               <Link2 className="w-4 h-4" />
             </button>
           </PopoverTrigger>
-          <PopoverContent className="w-80 p-3 space-y-2">
-            <p className="text-sm font-medium">Inserir link</p>
-            <Input placeholder="https://..." value={linkUrl} onChange={e => setLinkUrl(e.target.value)} onKeyDown={e => e.key === "Enter" && setLink()} />
+          <PopoverContent className="w-96 p-3 space-y-3" align="start">
+            <div className="space-y-2">
+              <p className="text-sm font-medium flex items-center gap-1.5">
+                <BookMarked className="w-4 h-4 text-primary" />
+                Citar artigo da wiki
+              </p>
+              <Input
+                placeholder="Buscar por título..."
+                value={articleQuery}
+                onChange={(e) => setArticleQuery(e.target.value)}
+                autoComplete="off"
+              />
+              <div className="max-h-48 overflow-y-auto rounded-md border border-border/60 divide-y divide-border/50">
+                {isLoadingCiteArticles ? (
+                  <p className="px-3 py-4 text-xs text-muted-foreground flex items-center gap-2">
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    Carregando artigos...
+                  </p>
+                ) : filteredCiteArticles.length ? (
+                  filteredCiteArticles.map((article) => (
+                    <button
+                      key={article.id}
+                      type="button"
+                      className="w-full text-left px-3 py-2 hover:bg-primary/10 transition-colors"
+                      onClick={() => citeArticle(article)}
+                    >
+                      <span className="block text-sm text-foreground line-clamp-1">{article.title}</span>
+                      <span className="block text-[11px] text-muted-foreground">{categoryLabel(article.category)}</span>
+                    </button>
+                  ))
+                ) : (
+                  <p className="px-3 py-4 text-xs text-muted-foreground">
+                    Nenhum artigo encontrado.
+                  </p>
+                )}
+              </div>
+            </div>
+            <div className="relative py-1">
+              <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-border" /></div>
+              <div className="relative flex justify-center text-xs"><span className="bg-popover px-2 text-muted-foreground">ou URL</span></div>
+            </div>
+            <Input placeholder="https://... ou /wiki/..." value={linkUrl} onChange={e => setLinkUrl(e.target.value)} onKeyDown={e => e.key === "Enter" && setLink()} />
             <div className="flex gap-2">
               <Button size="sm" onClick={setLink} className="flex-1">Aplicar</Button>
-              <Button size="sm" variant="outline" onClick={() => editor.chain().focus().unsetLink().run()}>Remover</Button>
+              <Button size="sm" variant="outline" onClick={() => { editor.chain().focus().unsetLink().run(); setLinkOpen(false); }}>Remover</Button>
             </div>
           </PopoverContent>
         </Popover>
