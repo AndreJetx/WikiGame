@@ -24,7 +24,7 @@ describe("crawlable HTML", () => {
     expect(html).toContain('lang="pt-BR"');
     expect(html).toContain('rel="canonical"');
     expect(html).toContain('property="og:image"');
-    expect(html).toContain("https://wiki-legendsofelements.vercel.app/og.jpg");
+    expect(html).toContain("https://wiki.legendsofelements.com/og.jpg");
     expect(html).toContain('property="og:type"');
     expect(html).toContain("application/ld+json");
     expect(html).toContain("SoftwareApplication");
@@ -49,7 +49,7 @@ describe("crawlable HTML", () => {
     const text = read("public/llms.txt").replace(/\r\n/g, "\n");
     expect(text.startsWith("# Legend of Elements Wiki\n")).toBe(true);
     expect(text).toContain("When to use this");
-    expect(text).toContain("https://wiki-legendsofelements.vercel.app/docs");
+    expect(text).toContain("https://wiki.legendsofelements.com/docs");
   });
 
   it("docs page is named for search", () => {

@@ -1,4 +1,4 @@
-export const SITE_ORIGIN = "https://wiki-legendsofelements.vercel.app";
+export const SITE_ORIGIN = "https://wiki.legendsofelements.com";
 export const SITE_NAME = "Legend of Elements Wiki";
 export const SITE_DESCRIPTION =
   "Community encyclopedia for Legend of Elements — cultivation, classes, equipment, spirits, pets, dungeons, PvP, events, and guides. Fan-made, unofficial, and built for players and agents.";

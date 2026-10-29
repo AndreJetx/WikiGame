@@ -75,8 +75,8 @@ describe("llms.txt", () => {
     const text = llmsTxt();
     expect(text.startsWith("# Legend of Elements Wiki\n")).toBe(true);
     expect(text).toContain("When to use this");
-    expect(text).toContain("https://wiki-legendsofelements.vercel.app/docs");
-    expect(text).toContain("https://wiki-legendsofelements.vercel.app/openapi.json");
+    expect(text).toContain("https://wiki.legendsofelements.com/docs");
+    expect(text).toContain("https://wiki.legendsofelements.com/openapi.json");
   });
 
   it("matches the published public file", () => {
@@ -97,7 +97,7 @@ describe("errors and sitemap", () => {
 
   it("emits valid sitemap xml", () => {
     const xml = buildSitemapXml([
-      { loc: "https://wiki-legendsofelements.vercel.app/", lastmod: "2026-09-04" },
+      { loc: "https://wiki.legendsofelements.com/", lastmod: "2026-09-04" },
     ]);
     expect(xml).toContain("<urlset");
     expect(xml).toContain("<lastmod>2026-09-04</lastmod>");

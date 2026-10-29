@@ -7,12 +7,12 @@ info:
     articles, categories, search hits, stats, and tool links. Write methods require an admin session cookie.
   contact:
     name: Legend of Elements Wiki
-    url: https://wiki-legendsofelements.vercel.app/contact
+    url: https://wiki.legendsofelements.com/contact
   license:
     name: Community / unofficial fan project
-    url: https://wiki-legendsofelements.vercel.app/about
+    url: https://wiki.legendsofelements.com/about
 servers:
-  - url: https://wiki-legendsofelements.vercel.app/api
+  - url: https://wiki.legendsofelements.com/api
     description: Production
   - url: /api
     description: Base API path
