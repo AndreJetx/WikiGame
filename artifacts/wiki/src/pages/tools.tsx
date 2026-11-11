@@ -4,7 +4,9 @@ import { useListTools, getListToolsQueryKey } from "@workspace/api-client-react"
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { CardClickHint } from "@/components/card-click-hint";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Link } from "wouter";
 import { Wrench, ExternalLink } from "lucide-react";
+import { presentTool } from "@/lib/tools";
 
 export function Tools() {
   const { data: tools, isLoading } = useListTools({ query: { queryKey: getListToolsQueryKey() } });
@@ -26,7 +28,7 @@ export function Tools() {
               <Skeleton key={i} className="h-32 rounded-xl" />
             ))
           ) : tools?.length ? (
-            tools.map(tool => {
+            tools.map(presentTool).map(tool => {
               const card = (
                 <Card className="relative h-full hover:border-primary/50 transition-colors bg-card/50 cursor-pointer overflow-hidden group pb-8">
                   <CardHeader>
@@ -52,9 +54,9 @@ export function Tools() {
                   {card}
                 </a>
               ) : (
-                <a key={tool.id} href={tool.href}>
+                <Link key={tool.id} href={tool.href}>
                   {card}
-                </a>
+                </Link>
               );
             })
           ) : (

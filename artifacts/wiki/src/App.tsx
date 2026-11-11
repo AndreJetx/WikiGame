@@ -1,5 +1,7 @@
+import { useEffect } from "react";
 import { Switch, Route, Router as WouterRouter, Redirect } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { getGetWikiStatsQueryKey } from "@workspace/api-client-react";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -11,6 +13,7 @@ import { Search } from "@/pages/search";
 import { Admin } from "@/pages/admin";
 import { Play } from "@/pages/play";
 import { Tools } from "@/pages/tools";
+import { MagitePage } from "@/pages/magite";
 import { About } from "@/pages/about";
 import { Contact } from "@/pages/contact";
 import { Privacy } from "@/pages/privacy";
@@ -28,6 +31,7 @@ function Router() {
       <Route path="/search" component={Search} />
       <Route path="/iniciar-jornada" component={Play} />
       <Route path="/ferramentas" component={Tools} />
+      <Route path="/ferramentas/controle-de-magites" component={MagitePage} />
       <Route path="/about" component={About} />
       <Route path="/contact" component={Contact} />
       <Route path="/privacy" component={Privacy} />
@@ -44,6 +48,23 @@ function Router() {
 }
 
 function App() {
+  useEffect(() => {
+    const storageKey = "wiki_site_access_sent";
+    if (sessionStorage.getItem(storageKey) === "1") return;
+    sessionStorage.setItem(storageKey, "1");
+    void fetch("/api/stats/visit", { method: "POST", credentials: "same-origin" })
+      .then(async (res) => {
+        if (!res.ok) throw new Error(String(res.status));
+        const body = (await res.json()) as { counted?: boolean };
+        if (body.counted) {
+          await queryClient.invalidateQueries({ queryKey: getGetWikiStatsQueryKey() });
+        }
+      })
+      .catch(() => {
+        sessionStorage.removeItem(storageKey);
+      });
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="dark">

@@ -8,6 +8,7 @@ import toolsRouter from "./tools";
 import adminRouter from "./admin";
 import agentRouter from "./agent";
 import mcpRouter from "./mcp";
+import magitesRouter from "./magites";
 import { sendApiError } from "../lib/json-error";
 
 const router: IRouter = Router();
@@ -21,6 +22,7 @@ router.use(statsRouter);
 router.use(toolsRouter);
 router.use(agentRouter);
 router.use(mcpRouter);
+router.use(magitesRouter);
 
 router.use((req, res) => {
   sendApiError(

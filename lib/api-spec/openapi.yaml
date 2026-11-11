@@ -478,7 +478,7 @@ paths:
       operationId: getWikiStats
       tags: [stats]
       summary: Get wiki statistics
-      description: Totals for articles, categories, views, and recent edits. Public.
+      description: Totals for articles, categories, accesses, and recent edits. totalViews adds article views to one access per browser visit, including the tools. Public.
       responses:
         "200":
           description: Wiki stats

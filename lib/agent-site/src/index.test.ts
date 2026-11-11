@@ -46,6 +46,7 @@ describe("known spa paths", () => {
     expect(isKnownSpaPath("/")).toBe(true);
     expect(isKnownSpaPath("/docs")).toBe(true);
     expect(isKnownSpaPath("/wiki/cultivation/foo")).toBe(true);
+    expect(isKnownSpaPath("/ferramentas/controle-de-magites")).toBe(true);
     expect(isKnownSpaPath("/some-path-that-does-not-exist")).toBe(false);
   });
 });

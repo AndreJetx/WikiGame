@@ -12,6 +12,7 @@ const EXACT_SPA = new Set([
   "/search",
   "/iniciar-jornada",
   "/ferramentas",
+  "/ferramentas/controle-de-magites",
   "/gerenciamentoartigos",
   "/admin",
   "/wiki",

@@ -34,6 +34,7 @@
     { "source": "/search", "destination": "/index" },
     { "source": "/iniciar-jornada", "destination": "/index" },
     { "source": "/ferramentas", "destination": "/index" },
+    { "source": "/ferramentas/controle-de-magites", "destination": "/index" },
     { "source": "/gerenciamentoartigos", "destination": "/index" },
     { "source": "/admin", "destination": "/index" }
   ],

@@ -13,14 +13,18 @@ export function Privacy() {
       <p>
         Server logs and the hosting provider (Vercel) may record standard request metadata such as
         IP address, user agent, and requested path, for operations and abuse prevention. Article
-        view counts increment when an article is fetched from the API. We do not sell personal data,
+        view counts increment when an article is fetched from the API. Opening the site or a tool
+        also counts as one site access per browser visit. We do not sell personal data,
         run advertising pixels, or build marketing profiles.
       </p>
       <h2 className="text-xl font-serif font-semibold text-primary pt-2">Cookies and local storage</h2>
       <p>
         A signed admin session cookie named wiki_admin_session is set only after a successful
-        maintainer login. Theme preference may be stored in localStorage in your browser. You can
-        clear both at any time.
+        maintainer login. Controle de Magites sets an httpOnly cookie named magite_session after an
+        existing player signs in, and may keep a local copy of that player's scenarios. There is no
+        public signup. A session cookie named wiki_site_access marks that this browser was already
+        counted for the current visit and stores no name or identifier. Theme preference may be
+        stored in localStorage in your browser. You can clear these at any time.
       </p>
       <p>
         If you believe personal data was posted inside an article, open an issue on{" "}

@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { db, articlesTable, categoriesTable, toolsTable } from "@workspace/db";
+import { db, articlesTable, categoriesTable, toolsTable, getSiteAccessCount } from "@workspace/db";
 import { and, asc, desc, eq, ilike, or, sql } from "drizzle-orm";
 import { SITE_NAME, SITE_ORIGIN } from "@workspace/agent-site";
 import { sendApiError } from "../lib/json-error";
@@ -153,9 +153,10 @@ async function callTool(name: string, args: Record<string, unknown>) {
       const [{ totalCategories }] = await db
         .select({ totalCategories: sql<number>`count(*)::int` })
         .from(categoriesTable);
-      const [{ totalViews }] = await db
-        .select({ totalViews: sql<number>`coalesce(sum(view_count), 0)::int` })
+      const [{ articleViews }] = await db
+        .select({ articleViews: sql<number>`coalesce(sum(view_count), 0)::int` })
         .from(articlesTable);
+      const totalViews = articleViews + (await getSiteAccessCount());
       const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
       const [{ recentEdits }] = await db
         .select({ recentEdits: sql<number>`count(*)::int` })

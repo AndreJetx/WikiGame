@@ -21,3 +21,14 @@ export const pool = new Pool({
 export const db = drizzle(pool, { schema });
 
 export * from "./schema";
+export {
+  loginUser,
+  createSession,
+  getUserBySession,
+  deleteSession,
+  deleteUserAccount,
+  type AuthUser,
+} from "./magites/auth";
+export { getAppState, saveAppState } from "./magites/state";
+export { parseAppState, loginCredentialsSchema, deleteAccountSchema } from "./magites/validation";
+export { getSiteAccessCount, recordSiteAccess } from "./site-access";

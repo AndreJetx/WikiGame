@@ -43,7 +43,7 @@ When to use this wiki: reach for it when a player asks how a mechanic works, whi
 ## Browse
 
 - [Search](${SITE_ORIGIN}/search): find articles by title or body text
-- [Tools](${SITE_ORIGIN}/ferramentas): adjacent calculators and community sites
+- [Tools](${SITE_ORIGIN}/ferramentas): community links, plus Controle de Magites inside the wiki
 - [Play Legend of Elements](${GAME_URL}): official game client
 - [API documentation](${SITE_ORIGIN}/docs): public endpoints, auth, and examples
 - [OpenAPI](${SITE_ORIGIN}/openapi.json): machine-readable API contract
@@ -81,9 +81,9 @@ export const PRIVACY_MARKDOWN = `# Privacy — ${SITE_NAME}
 
 ${SITE_NAME} is a free unofficial encyclopedia. This page explains what little data the site handles. Browsing articles does not require an account. The public API is readable without authentication. Administrative editing uses a password cookie on this domain only and is limited to trusted maintainers.
 
-Server logs and the hosting provider (Vercel) may record standard request metadata such as IP address, user agent, and requested path, for operations and abuse prevention. Article view counts increment when an article is fetched from the API. We do not sell personal data, run advertising pixels, or build marketing profiles.
+Server logs and the hosting provider (Vercel) may record standard request metadata such as IP address, user agent, and requested path, for operations and abuse prevention. Article view counts increment when an article is fetched from the API. Opening the site or a tool also counts as one site access per browser visit. We do not sell personal data, run advertising pixels, or build marketing profiles.
 
-Cookies: a signed admin session cookie named wiki_admin_session is set only after a successful maintainer login. Theme preference may be stored in localStorage in your browser. You can clear both at any time.
+Cookies: a signed admin session cookie named wiki_admin_session is set only after a successful maintainer login. Controle de Magites sets an httpOnly cookie named magite_session after an existing player signs in, and may keep a local copy of that player's scenarios. There is no public signup. A session cookie named wiki_site_access marks that this browser was already counted for the current visit and stores no name or identifier. Theme preference may be stored in localStorage in your browser. You can clear these at any time.
 
 If you believe personal data was posted inside an article, open an issue at ${GITHUB_URL} and we will edit or remove it. This policy applies to ${SITE_ORIGIN} and its public API. The official game at ${GAME_URL} has its own terms.
 `;
@@ -131,9 +131,17 @@ Use the search page or \`GET ${SITE_ORIGIN}/api/search?q=\` to find encyclopedia
 `,
   "/ferramentas": `# Ferramentas — ${SITE_NAME}
 
-Community tools and adjacent sites linked from the wiki. List them programmatically with \`GET ${SITE_ORIGIN}/api/tools\` or the MCP \`list_tools\` tool.
+Community tools linked from the wiki. Controle de Magites lives on this site and keeps the scenarios already saved for existing accounts. List tools with \`GET ${SITE_ORIGIN}/api/tools\` or the MCP \`list_tools\` tool.
 
+- [Controle de Magites](${SITE_ORIGIN}/ferramentas/controle-de-magites)
 - [API docs](${SITE_ORIGIN}/docs)
+`,
+  "/ferramentas/controle-de-magites": `# Controle de Magites — ${SITE_NAME}
+
+Player ledger for gains, losses, and character status. It is part of the wiki, not a separate site. Sign-in uses accounts that already exist; new registration is closed. Each account loads the scenarios stored for that user.
+
+- [Tools](${SITE_ORIGIN}/ferramentas)
+- [Home](${SITE_ORIGIN}/)
 `,
   "/iniciar-jornada": `# Iniciar Jornada — ${SITE_NAME}
 
