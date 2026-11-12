@@ -91,7 +91,7 @@ export function Article() {
               </div>
             ) : null}
 
-            <ArticleBody html={article.content} />
+            <ArticleBody html={article.content} zoomImages={article.category === "artwork"} />
 
             {article.tags && article.tags.length > 0 && (
               <div className="mt-12 pt-8 border-t border-border flex flex-wrap gap-2 not-prose">

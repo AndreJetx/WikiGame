@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { CardClickHint } from "@/components/card-click-hint";
+import { ImageLightbox } from "@/components/image-lightbox";
 import { useLocation } from "wouter";
 import { handleWikiContentClick } from "@/lib/wiki-links";
 
@@ -238,23 +239,55 @@ export function groupBlocksByH1(blocks: ArticleBlock[]): GroupedArticle {
   return { preamble, sections };
 }
 
-function WikiHtml({ html, className }: { html: string; className?: string }) {
+type ZoomImage = { src: string; alt: string };
+
+function imageFromClick(target: EventTarget | null): ZoomImage | null {
+  if (!(target instanceof Element)) return null;
+  const image = target.closest("img");
+  if (!(image instanceof HTMLImageElement)) return null;
+  const src = image.currentSrc || image.src;
+  if (!src) return null;
+  return { src, alt: image.alt || "Arte" };
+}
+
+function WikiHtml({
+  html,
+  className,
+  onImageClick,
+}: {
+  html: string;
+  className?: string;
+  onImageClick?: (image: ZoomImage) => void;
+}) {
   const [, setLocation] = useLocation();
   return (
     <div
-      className={className}
+      className={`${className ?? ""} ${onImageClick ? "wiki-zoom-images" : ""}`.trim()}
       dangerouslySetInnerHTML={{ __html: html }}
-      onClick={(event) => handleWikiContentClick(event, setLocation)}
+      onClick={(event) => {
+        const image = onImageClick ? imageFromClick(event.target) : null;
+        if (image && onImageClick) {
+          event.preventDefault();
+          event.stopPropagation();
+          onImageClick(image);
+          return;
+        }
+        handleWikiContentClick(event, setLocation);
+      }}
     />
   );
 }
 
-function renderArticleBlocks(blocks: ArticleBlock[], keyPrefix: string) {
+function renderArticleBlocks(blocks: ArticleBlock[], keyPrefix: string, zoomImages: boolean) {
   return blocks.map((block, index) =>
     block.type === "html" ? (
       <WikiHtml key={`${keyPrefix}-html-${index}`} html={block.html} />
     ) : (
-      <WikiTableGallery key={`${keyPrefix}-table-${index}`} table={block.table} />
+      <WikiTableGallery
+        key={`${keyPrefix}-table-${index}`}
+        table={block.table}
+        zoomImages={zoomImages}
+      />
     ),
   );
 }
@@ -298,9 +331,11 @@ function useGalleryLayout() {
 function WikiCardList({
   table,
   onOpen,
+  onImage,
 }: {
   table: WikiTableData;
   onOpen: (index: number) => void;
+  onImage?: (image: ZoomImage) => void;
 }) {
   const trackRef = useRef<HTMLDivElement>(null);
   const [page, setPage] = useState(0);
@@ -327,6 +362,13 @@ function WikiCardList({
             type="button"
             className="wiki-table-card wiki-table-card-list"
             onClick={(event) => {
+              const image = onImage ? imageFromClick(event.target) : null;
+              if (image && onImage) {
+                event.preventDefault();
+                event.stopPropagation();
+                onImage(image);
+                return;
+              }
               if (handleWikiContentClick(event, setLocation)) {
                 event.stopPropagation();
                 return;
@@ -456,9 +498,16 @@ function useSwipeNavigate(enabled: boolean, onPrev: () => void, onNext: () => vo
   return setSurface;
 }
 
-export function WikiTableGallery({ table }: { table: WikiTableData }) {
+export function WikiTableGallery({
+  table,
+  zoomImages = false,
+}: {
+  table: WikiTableData;
+  zoomImages?: boolean;
+}) {
   const { layout, choose, showStack } = useGalleryLayout();
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const [zoom, setZoom] = useState<ZoomImage | null>(null);
   const [direction, setDirection] = useState<"next" | "prev" | "none">("none");
   const [, setLocation] = useLocation();
   const total = table.rows.length;
@@ -501,7 +550,7 @@ export function WikiTableGallery({ table }: { table: WikiTableData }) {
   }, [selectedIndex, total, goPrev, goNext]);
 
   return (
-    <div className="wiki-table-gallery not-prose">
+    <div className={`wiki-table-gallery not-prose${zoomImages ? " wiki-table-zoom" : ""}`}>
       <div className="wiki-table-toolbar">
         <ToggleGroup
           type="single"
@@ -530,6 +579,7 @@ export function WikiTableGallery({ table }: { table: WikiTableData }) {
       {showStack ? (
         <WikiCardList
           table={table}
+          onImage={zoomImages ? setZoom : undefined}
           onOpen={(index) => {
             setDirection("none");
             setSelectedIndex(index);
@@ -546,6 +596,13 @@ export function WikiTableGallery({ table }: { table: WikiTableData }) {
                 type="button"
                 className="wiki-table-card"
                 onClick={(event) => {
+                  const image = zoomImages ? imageFromClick(event.target) : null;
+                  if (image) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    setZoom(image);
+                    return;
+                  }
                   if (handleWikiContentClick(event, setLocation)) {
                     event.stopPropagation();
                     return;
@@ -577,6 +634,23 @@ export function WikiTableGallery({ table }: { table: WikiTableData }) {
         <DialogContent
           className="flex flex-col max-w-lg max-h-[85vh] overflow-hidden border-primary/20 bg-card p-6"
           onOpenAutoFocus={(event) => event.preventDefault()}
+          onEscapeKeyDown={(event) => {
+            if (!zoom) return;
+            event.preventDefault();
+            setZoom(null);
+          }}
+          onPointerDownOutside={(event) => {
+            const target = event.target;
+            if (target instanceof Element && target.closest("[data-image-zoom]")) {
+              event.preventDefault();
+            }
+          }}
+          onInteractOutside={(event) => {
+            const target = event.target;
+            if (target instanceof Element && target.closest("[data-image-zoom]")) {
+              event.preventDefault();
+            }
+          }}
         >
           <div ref={swipeRef} className="wiki-table-swipe">
             {selected ? (
@@ -598,6 +672,7 @@ export function WikiTableGallery({ table }: { table: WikiTableData }) {
                     <WikiHtml
                       className="wiki-table-modal-preview"
                       html={selected[0].html}
+                      onImageClick={zoomImages ? setZoom : undefined}
                     />
                   ) : null}
                   {extraCells.map((cell, index) => {
@@ -606,7 +681,7 @@ export function WikiTableGallery({ table }: { table: WikiTableData }) {
                     return (
                       <section key={index} className="wiki-table-modal-field">
                         {label ? <h3>{label}</h3> : null}
-                        <WikiHtml html={cell.html} />
+                        <WikiHtml html={cell.html} onImageClick={zoomImages ? setZoom : undefined} />
                       </section>
                     );
                   })}
@@ -631,11 +706,14 @@ export function WikiTableGallery({ table }: { table: WikiTableData }) {
           ) : null}
         </DialogContent>
       </Dialog>
+      {zoom ? (
+        <ImageLightbox src={zoom.src} alt={zoom.alt} onClose={() => setZoom(null)} />
+      ) : null}
     </div>
   );
 }
 
-export function ArticleBody({ html }: { html: string }) {
+export function ArticleBody({ html, zoomImages = false }: { html: string; zoomImages?: boolean }) {
   const { headings, preamble, sections } = useMemo(() => {
     const prepared = injectHeadingIds(html);
     const blocks = parseArticleBlocks(prepared.html);
@@ -702,7 +780,7 @@ export function ArticleBody({ html }: { html: string }) {
         </nav>
       ) : null}
       <div className="tiptap-content" onClick={(event) => handleWikiContentClick(event, setLocation)}>
-        {renderArticleBlocks(preamble, "preamble")}
+        {renderArticleBlocks(preamble, "preamble", zoomImages)}
         {sections.map((section) => (
           <Collapsible
             key={section.id}
@@ -732,7 +810,7 @@ export function ArticleBody({ html }: { html: string }) {
               </CollapsibleTrigger>
             </h1>
             <CollapsibleContent className="article-h1-content">
-              {renderArticleBlocks(section.children, section.id)}
+              {renderArticleBlocks(section.children, section.id, zoomImages)}
             </CollapsibleContent>
           </Collapsible>
         ))}

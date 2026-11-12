@@ -570,6 +570,12 @@ a:hover .card-click-plus,
   border-radius: 0.6rem;
   margin: 0 auto;
 }
+.wiki-table-zoom .wiki-table-card-body img,
+.wiki-table-zoom .wiki-table-modal img,
+.wiki-zoom-images img {
+  pointer-events: auto;
+  cursor: zoom-in;
+}
 .wiki-table-modal-preview {
   display: flex;
   flex-direction: column;
