@@ -87,6 +87,10 @@ components:
           type: integer
         imageUrl:
           type: ["string", "null"]
+        imageAspect:
+          type: ["string", "null"]
+          enum: ["16:9", "4:3", "3:2", "1:1", "2:3", "3:4", "9:16", null]
+          description: Display frame for an artwork cover. Used when category is artwork.
         createdAt:
           type: string
         updatedAt:
@@ -116,6 +120,10 @@ components:
           type: boolean
         imageUrl:
           type: ["string", "null"]
+        imageAspect:
+          type: ["string", "null"]
+          enum: ["16:9", "4:3", "3:2", "1:1", "2:3", "3:4", "9:16", null]
+          description: Display frame for an artwork cover. Used when category is artwork.
     ArticleUpdate:
       type: object
       properties:
@@ -137,6 +145,10 @@ components:
           type: boolean
         imageUrl:
           type: ["string", "null"]
+        imageAspect:
+          type: ["string", "null"]
+          enum: ["16:9", "4:3", "3:2", "1:1", "2:3", "3:4", "9:16", null]
+          description: Display frame for an artwork cover. Used when category is artwork.
     Category:
       type: object
       required: [id, name, slug, description, icon, articleCount]

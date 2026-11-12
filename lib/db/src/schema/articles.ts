@@ -15,6 +15,7 @@ export const articlesTable = wikiSchema.table("articles", {
   featured: boolean("featured").notNull().default(false),
   viewCount: integer("view_count").notNull().default(0),
   imageUrl: text("image_url"),
+  imageAspect: text("image_aspect"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });

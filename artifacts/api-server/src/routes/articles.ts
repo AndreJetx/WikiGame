@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { db, articlesTable } from "@workspace/db";
+import { db, articlesTable, pool } from "@workspace/db";
 import { eq, sql, desc } from "drizzle-orm";
 import {
   ListArticlesQueryParams,
@@ -14,6 +14,34 @@ import { requireAdmin } from "../middlewares/require-admin";
 import { sendApiError } from "../lib/json-error";
 
 const router = Router();
+
+const ARTWORK_ASPECTS = ["16:9", "4:3", "3:2", "1:1", "2:3", "3:4", "9:16"] as const;
+type ArtworkAspect = (typeof ARTWORK_ASPECTS)[number];
+const ARTWORK_ASPECT_SET = new Set<string>(ARTWORK_ASPECTS);
+
+let imageAspectReady: Promise<void> | null = null;
+
+function ensureImageAspectColumn() {
+  imageAspectReady ??= pool
+    .query("ALTER TABLE wiki.articles ADD COLUMN IF NOT EXISTS image_aspect text")
+    .then(() => undefined);
+  return imageAspectReady;
+}
+
+function artworkAspect(category: string, value: string | null | undefined): ArtworkAspect | null {
+  if (category !== "artwork") return null;
+  if (value && ARTWORK_ASPECT_SET.has(value)) return value as ArtworkAspect;
+  return "3:4";
+}
+
+router.use(async (_req, _res, next) => {
+  try {
+    await ensureImageAspectColumn();
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
 
 router.get("/articles", async (req, res) => {
   const parsed = ListArticlesQueryParams.safeParse(req.query);
@@ -129,9 +157,23 @@ router.post("/articles", requireAdmin, async (req, res) => {
     );
     return;
   }
+  if (parsed.data.imageAspect && !ARTWORK_ASPECT_SET.has(parsed.data.imageAspect)) {
+    sendApiError(
+      res,
+      400,
+      "INVALID_BODY",
+      "Invalid body",
+      "imageAspect must be 16:9, 4:3, 3:2, 1:1, 2:3, 3:4, or 9:16",
+    );
+    return;
+  }
   const [article] = await db
     .insert(articlesTable)
-    .values({ ...parsed.data, tags: parsed.data.tags ?? [] })
+    .values({
+      ...parsed.data,
+      tags: parsed.data.tags ?? [],
+      imageAspect: artworkAspect(parsed.data.category, parsed.data.imageAspect),
+    })
     .returning();
   res.status(201).json({
     ...article,
@@ -154,7 +196,29 @@ router.put("/articles/:slug", requireAdmin, async (req, res) => {
     );
     return;
   }
+  if (bodyParsed.data.imageAspect && !ARTWORK_ASPECT_SET.has(bodyParsed.data.imageAspect)) {
+    sendApiError(
+      res,
+      400,
+      "INVALID_REQUEST",
+      "Invalid request",
+      "imageAspect must be 16:9, 4:3, 3:2, 1:1, 2:3, 3:4, or 9:16",
+    );
+    return;
+  }
   const updates = { ...bodyParsed.data, updatedAt: new Date() };
+  if (updates.category === "artwork" || updates.imageAspect !== undefined) {
+    const [current] = await db
+      .select({ category: articlesTable.category })
+      .from(articlesTable)
+      .where(eq(articlesTable.slug, paramsParsed.data.slug));
+    const category = updates.category ?? current?.category ?? "";
+    updates.imageAspect = category === "artwork"
+      ? artworkAspect(category, updates.imageAspect)
+      : null;
+  } else if (updates.category && updates.category !== "artwork") {
+    updates.imageAspect = null;
+  }
   const [article] = await db
     .update(articlesTable)
     .set(updates)

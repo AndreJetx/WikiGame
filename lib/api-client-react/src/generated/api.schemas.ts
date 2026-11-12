@@ -24,6 +24,23 @@ export interface HealthStatus {
   status: string;
 }
 
+/**
+ * Display frame for an artwork cover. Used when category is artwork.
+ * @nullable
+ */
+export type ArticleImageAspect = typeof ArticleImageAspect[keyof typeof ArticleImageAspect] | null;
+
+
+export const ArticleImageAspect = {
+  '16:9': '16:9',
+  '4:3': '4:3',
+  '3:2': '3:2',
+  '1:1': '1:1',
+  '2:3': '2:3',
+  '3:4': '3:4',
+  '9:16': '9:16',
+} as const;
+
 export interface Article {
   id: number;
   title: string;
@@ -36,9 +53,31 @@ export interface Article {
   viewCount: number;
   /** @nullable */
   imageUrl?: string | null;
+  /**
+     * Display frame for an artwork cover. Used when category is artwork.
+     * @nullable
+     */
+  imageAspect?: ArticleImageAspect;
   createdAt: string;
   updatedAt: string;
 }
+
+/**
+ * Display frame for an artwork cover. Used when category is artwork.
+ * @nullable
+ */
+export type ArticleInputImageAspect = typeof ArticleInputImageAspect[keyof typeof ArticleInputImageAspect] | null;
+
+
+export const ArticleInputImageAspect = {
+  '16:9': '16:9',
+  '4:3': '4:3',
+  '3:2': '3:2',
+  '1:1': '1:1',
+  '2:3': '2:3',
+  '3:4': '3:4',
+  '9:16': '9:16',
+} as const;
 
 export interface ArticleInput {
   /** @minLength 1 */
@@ -53,7 +92,29 @@ export interface ArticleInput {
   featured?: boolean;
   /** @nullable */
   imageUrl?: string | null;
+  /**
+     * Display frame for an artwork cover. Used when category is artwork.
+     * @nullable
+     */
+  imageAspect?: ArticleInputImageAspect;
 }
+
+/**
+ * Display frame for an artwork cover. Used when category is artwork.
+ * @nullable
+ */
+export type ArticleUpdateImageAspect = typeof ArticleUpdateImageAspect[keyof typeof ArticleUpdateImageAspect] | null;
+
+
+export const ArticleUpdateImageAspect = {
+  '16:9': '16:9',
+  '4:3': '4:3',
+  '3:2': '3:2',
+  '1:1': '1:1',
+  '2:3': '2:3',
+  '3:4': '3:4',
+  '9:16': '9:16',
+} as const;
 
 export interface ArticleUpdate {
   title?: string;
@@ -65,6 +126,11 @@ export interface ArticleUpdate {
   featured?: boolean;
   /** @nullable */
   imageUrl?: string | null;
+  /**
+     * Display frame for an artwork cover. Used when category is artwork.
+     * @nullable
+     */
+  imageAspect?: ArticleUpdateImageAspect;
 }
 
 export interface Category {

@@ -14,6 +14,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { RichEditor } from "@/components/rich-editor";
 import { useQueryClient } from "@tanstack/react-query";
 import { ImageUploadField } from "@/components/image-upload-field";
+import { ARTWORK_ASPECTS } from "@/lib/artwork-aspect";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { fetchAdminSession, loginAdmin, logoutAdmin } from "@/lib/admin-session";
@@ -167,11 +168,11 @@ function GerenciamentoArtigos() {
   const { toast } = useToast();
 
   const [formData, setFormData] = useState({
-    title: "", slug: "", category: "cultivation", excerpt: "", content: "", tags: "", imageUrl: "", featured: false
+    title: "", slug: "", category: "cultivation", excerpt: "", content: "", tags: "", imageUrl: "", imageAspect: "3:4", featured: false
   });
 
   const resetForm = () => {
-    setFormData({ title: "", slug: "", category: "cultivation", excerpt: "", content: "", tags: "", imageUrl: "", featured: false });
+    setFormData({ title: "", slug: "", category: "cultivation", excerpt: "", content: "", tags: "", imageUrl: "", imageAspect: "3:4", featured: false });
     setEditingSlug(null);
   };
 
@@ -204,6 +205,7 @@ function GerenciamentoArtigos() {
       content: article.content,
       tags: article.tags?.join(", ") || "",
       imageUrl: article.imageUrl || "",
+      imageAspect: article.imageAspect || "3:4",
       featured: article.featured || false
     });
     setEditingSlug(article.slug);
@@ -247,6 +249,7 @@ function GerenciamentoArtigos() {
       content: formData.content,
       tags: formData.tags.split(",").map(t => t.trim()).filter(Boolean),
       imageUrl: formData.imageUrl || null,
+      imageAspect: formData.category === "artwork" ? formData.imageAspect : null,
       featured: formData.featured
     };
 
@@ -303,7 +306,7 @@ function GerenciamentoArtigos() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Categoria</label>
-                    <Select value={formData.category} onValueChange={v => setFormData({...formData, category: v})}>
+                    <Select value={formData.category} onValueChange={v => setFormData({ ...formData, category: v, imageAspect: formData.imageAspect || "3:4" })}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -315,8 +318,26 @@ function GerenciamentoArtigos() {
                   <ImageUploadField
                     value={formData.imageUrl}
                     onChange={(imageUrl) => setFormData({ ...formData, imageUrl })}
+                    aspect={formData.category === "artwork" ? formData.imageAspect : null}
                   />
                 </div>
+                {formData.category === "artwork" ? (
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Formato da arte</label>
+                    <div className="flex flex-wrap gap-2">
+                      {ARTWORK_ASPECTS.map((aspect) => (
+                        <Button
+                          key={aspect.id}
+                          type="button"
+                          variant={formData.imageAspect === aspect.id ? "default" : "outline"}
+                          onClick={() => setFormData({ ...formData, imageAspect: aspect.id })}
+                        >
+                          {aspect.label}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Resumo</label>
                   <Textarea value={formData.excerpt} onChange={e => setFormData({...formData, excerpt: e.target.value})} required />

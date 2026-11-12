@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ArtworkDisplay } from "@/components/artwork-display";
 import { CloudinaryImage } from "@/components/cloudinary-image";
 import { uploadImageToCloudinary, isCloudinaryConfigured } from "@/lib/cloudinary";
 import { ImagePlus, Loader2, X } from "lucide-react";
@@ -9,9 +10,10 @@ type Props = {
   value: string;
   onChange: (url: string) => void;
   folder?: string;
+  aspect?: string | null;
 };
 
-export function ImageUploadField({ value, onChange, folder = "wiki-articles/covers" }: Props) {
+export function ImageUploadField({ value, onChange, folder = "wiki-articles/covers", aspect }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -74,15 +76,26 @@ export function ImageUploadField({ value, onChange, folder = "wiki-articles/cove
           </p>
         )}
         {value ? (
-          <div className="relative rounded-lg overflow-hidden border border-border/50 bg-muted/30 h-36">
-            <CloudinaryImage
-              src={value}
-              alt="Capa"
-              className="w-full h-full object-cover"
-              width={640}
-              height={288}
-              crop="fill"
-            />
+          <div className="relative">
+            {aspect ? (
+              <ArtworkDisplay
+                src={value}
+                alt="Capa"
+                aspect={aspect}
+                className="rounded-lg border border-border/50"
+              />
+            ) : (
+              <div className="h-36 overflow-hidden rounded-lg border border-border/50 bg-muted/30">
+                <CloudinaryImage
+                  src={value}
+                  alt="Capa"
+                  className="w-full h-full object-cover"
+                  width={640}
+                  height={288}
+                  crop="fill"
+                />
+              </div>
+            )}
             <Button
               type="button"
               variant="secondary"

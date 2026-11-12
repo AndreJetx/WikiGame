@@ -9,8 +9,11 @@ articles, categories, search hits, stats, and tool links. Write methods require 
  */
 
 export * from './article';
+export * from './articleImageAspect';
 export * from './articleInput';
+export * from './articleInputImageAspect';
 export * from './articleUpdate';
+export * from './articleUpdateImageAspect';
 export * from './badRequestResponse';
 export * from './category';
 export * from './healthStatus';

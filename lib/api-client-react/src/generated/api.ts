@@ -843,7 +843,7 @@ export const getGetWikiStatsUrl = () => {
 }
 
 /**
- * Totals for articles, categories, views, and recent edits. Public.
+ * Totals for articles, categories, accesses, and recent edits. totalViews adds article views to one access per browser visit, including the tools. Public.
  * @summary Get wiki statistics
  */
 export const getWikiStats = async ( options?: RequestInit): Promise<WikiStats> => {

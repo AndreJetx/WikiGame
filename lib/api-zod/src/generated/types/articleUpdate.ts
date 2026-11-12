@@ -7,6 +7,7 @@ articles, categories, search hits, stats, and tool links. Write methods require 
 
  * OpenAPI spec version: 0.1.0
  */
+import type { ArticleUpdateImageAspect } from './articleUpdateImageAspect';
 
 export interface ArticleUpdate {
   title?: string;
@@ -18,4 +19,9 @@ export interface ArticleUpdate {
   featured?: boolean;
   /** @nullable */
   imageUrl?: string | null;
+  /**
+     * Display frame for an artwork cover. Used when category is artwork.
+     * @nullable
+     */
+  imageAspect?: ArticleUpdateImageAspect;
 }

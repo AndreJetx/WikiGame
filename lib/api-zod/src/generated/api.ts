@@ -47,6 +47,7 @@ export const ListArticlesResponseItem = zod.object({
   "featured": zod.boolean(),
   "viewCount": zod.number(),
   "imageUrl": zod.string().nullish(),
+  "imageAspect": zod.union([zod.literal('16:9'),zod.literal('4:3'),zod.literal('3:2'),zod.literal('1:1'),zod.literal('2:3'),zod.literal('3:4'),zod.literal('9:16'),zod.literal(null)]).nullish().describe('Display frame for an artwork cover. Used when category is artwork.'),
   "createdAt": zod.string(),
   "updatedAt": zod.string()
 })
@@ -70,7 +71,8 @@ export const CreateArticleBody = zod.object({
   "excerpt": zod.string(),
   "tags": zod.array(zod.string()),
   "featured": zod.boolean().optional(),
-  "imageUrl": zod.string().nullish()
+  "imageUrl": zod.string().nullish(),
+  "imageAspect": zod.union([zod.literal('16:9'),zod.literal('4:3'),zod.literal('3:2'),zod.literal('1:1'),zod.literal('2:3'),zod.literal('3:4'),zod.literal('9:16'),zod.literal(null)]).nullish().describe('Display frame for an artwork cover. Used when category is artwork.')
 })
 
 
@@ -89,6 +91,7 @@ export const ListFeaturedArticlesResponseItem = zod.object({
   "featured": zod.boolean(),
   "viewCount": zod.number(),
   "imageUrl": zod.string().nullish(),
+  "imageAspect": zod.union([zod.literal('16:9'),zod.literal('4:3'),zod.literal('3:2'),zod.literal('1:1'),zod.literal('2:3'),zod.literal('3:4'),zod.literal('9:16'),zod.literal(null)]).nullish().describe('Display frame for an artwork cover. Used when category is artwork.'),
   "createdAt": zod.string(),
   "updatedAt": zod.string()
 })
@@ -118,6 +121,7 @@ export const ListRecentArticlesResponseItem = zod.object({
   "featured": zod.boolean(),
   "viewCount": zod.number(),
   "imageUrl": zod.string().nullish(),
+  "imageAspect": zod.union([zod.literal('16:9'),zod.literal('4:3'),zod.literal('3:2'),zod.literal('1:1'),zod.literal('2:3'),zod.literal('3:4'),zod.literal('9:16'),zod.literal(null)]).nullish().describe('Display frame for an artwork cover. Used when category is artwork.'),
   "createdAt": zod.string(),
   "updatedAt": zod.string()
 })
@@ -143,6 +147,7 @@ export const GetArticleResponse = zod.object({
   "featured": zod.boolean(),
   "viewCount": zod.number(),
   "imageUrl": zod.string().nullish(),
+  "imageAspect": zod.union([zod.literal('16:9'),zod.literal('4:3'),zod.literal('3:2'),zod.literal('1:1'),zod.literal('2:3'),zod.literal('3:4'),zod.literal('9:16'),zod.literal(null)]).nullish().describe('Display frame for an artwork cover. Used when category is artwork.'),
   "createdAt": zod.string(),
   "updatedAt": zod.string()
 })
@@ -164,7 +169,8 @@ export const UpdateArticleBody = zod.object({
   "excerpt": zod.string().optional(),
   "tags": zod.array(zod.string()).optional(),
   "featured": zod.boolean().optional(),
-  "imageUrl": zod.string().nullish()
+  "imageUrl": zod.string().nullish(),
+  "imageAspect": zod.union([zod.literal('16:9'),zod.literal('4:3'),zod.literal('3:2'),zod.literal('1:1'),zod.literal('2:3'),zod.literal('3:4'),zod.literal('9:16'),zod.literal(null)]).nullish().describe('Display frame for an artwork cover. Used when category is artwork.')
 })
 
 export const UpdateArticleResponse = zod.object({
@@ -178,6 +184,7 @@ export const UpdateArticleResponse = zod.object({
   "featured": zod.boolean(),
   "viewCount": zod.number(),
   "imageUrl": zod.string().nullish(),
+  "imageAspect": zod.union([zod.literal('16:9'),zod.literal('4:3'),zod.literal('3:2'),zod.literal('1:1'),zod.literal('2:3'),zod.literal('3:4'),zod.literal('9:16'),zod.literal(null)]).nullish().describe('Display frame for an artwork cover. Used when category is artwork.'),
   "createdAt": zod.string(),
   "updatedAt": zod.string()
 })
@@ -230,6 +237,7 @@ export const SearchArticlesResponseItem = zod.object({
   "featured": zod.boolean(),
   "viewCount": zod.number(),
   "imageUrl": zod.string().nullish(),
+  "imageAspect": zod.union([zod.literal('16:9'),zod.literal('4:3'),zod.literal('3:2'),zod.literal('1:1'),zod.literal('2:3'),zod.literal('3:4'),zod.literal('9:16'),zod.literal(null)]).nullish().describe('Display frame for an artwork cover. Used when category is artwork.'),
   "createdAt": zod.string(),
   "updatedAt": zod.string()
 })
@@ -237,7 +245,7 @@ export const SearchArticlesResponse = zod.array(SearchArticlesResponseItem)
 
 
 /**
- * Totals for articles, categories, views, and recent edits. Public.
+ * Totals for articles, categories, accesses, and recent edits. totalViews adds article views to one access per browser visit, including the tools. Public.
  * @summary Get wiki statistics
  */
 export const GetWikiStatsResponse = zod.object({

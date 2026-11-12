@@ -1,5 +1,6 @@
 import { Layout } from "@/components/layout";
 import { Sidebar, CATEGORIES, CategoryIcon } from "@/components/sidebar";
+import { ArtworkDisplay } from "@/components/artwork-display";
 import { CloudinaryImage } from "@/components/cloudinary-image";
 import { Link } from "wouter";
 import coverImage from "@assets/legend-of-elements-wiki-hero.jpg";
@@ -88,7 +89,14 @@ export function Home() {
               featuredArticles.map(article => (
                 <Link key={article.id} href={`/wiki/${article.category}/${article.slug}`}>
                   <Card className="relative h-full hover:border-primary/50 transition-colors bg-card/50 cursor-pointer overflow-hidden group pb-8">
-                    {article.imageUrl && (
+                    {article.imageUrl && article.category === "artwork" ? (
+                      <ArtworkDisplay
+                        src={article.imageUrl}
+                        alt={article.title}
+                        aspect={article.imageAspect}
+                        fit="card"
+                      />
+                    ) : article.imageUrl ? (
                       <div className="h-24 w-full overflow-hidden">
                         <CloudinaryImage
                           src={article.imageUrl}
@@ -99,7 +107,7 @@ export function Home() {
                           crop="fill"
                         />
                       </div>
-                    )}
+                    ) : null}
                     <CardHeader className={article.imageUrl ? 'pt-4' : ''}>
                       <CardTitle className="line-clamp-2 text-primary group-hover:text-primary/80 transition-colors">{article.title}</CardTitle>
                       <CardDescription className="line-clamp-2">{article.excerpt}</CardDescription>

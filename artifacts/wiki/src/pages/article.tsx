@@ -1,5 +1,6 @@
 import { Layout } from "@/components/layout";
 import { Sidebar, CATEGORIES } from "@/components/sidebar";
+import { ArtworkDisplay } from "@/components/artwork-display";
 import { CloudinaryImage } from "@/components/cloudinary-image";
 import { useRoute, Link } from "wouter";
 import { useGetArticle, getGetArticleQueryKey } from "@workspace/api-client-react";
@@ -70,7 +71,14 @@ export function Article() {
               )}
             </div>
 
-            {article.imageUrl && (
+            {article.imageUrl && article.category === "artwork" ? (
+              <ArtworkDisplay
+                src={article.imageUrl}
+                alt={article.title}
+                aspect={article.imageAspect}
+                className="mb-10 rounded-2xl border border-border/50 shadow-lg not-prose"
+              />
+            ) : article.imageUrl ? (
               <div className="mb-10 rounded-2xl overflow-hidden border border-border/50 shadow-lg not-prose">
                 <CloudinaryImage
                   src={article.imageUrl}
@@ -81,7 +89,7 @@ export function Article() {
                   crop="fill"
                 />
               </div>
-            )}
+            ) : null}
 
             <ArticleBody html={article.content} />
 

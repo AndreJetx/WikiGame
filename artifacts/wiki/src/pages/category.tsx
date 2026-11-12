@@ -1,5 +1,6 @@
 import { Layout } from "@/components/layout";
 import { Sidebar, CATEGORIES, CategoryIcon } from "@/components/sidebar";
+import { ArtworkDisplay } from "@/components/artwork-display";
 import { CloudinaryImage } from "@/components/cloudinary-image";
 import { useRoute, Link } from "wouter";
 import { useListArticles, getListArticlesQueryKey } from "@workspace/api-client-react";
@@ -72,7 +73,15 @@ export function Category() {
               >
                 <Link href={`/wiki/${article.category}/${article.slug}`}>
                   <Card className="relative h-full hover:border-primary/50 transition-colors bg-card/50 cursor-pointer overflow-hidden group pb-8">
-                    {article.imageUrl && (
+                    {article.imageUrl && categorySlug === "artwork" ? (
+                      <ArtworkDisplay
+                        src={article.imageUrl}
+                        alt={article.title}
+                        aspect={article.imageAspect}
+                        fit="card"
+                        className="border-b border-border"
+                      />
+                    ) : article.imageUrl ? (
                       <div className="h-32 w-full overflow-hidden border-b border-border">
                         <CloudinaryImage
                           src={article.imageUrl}
@@ -83,7 +92,7 @@ export function Category() {
                           crop="fill"
                         />
                       </div>
-                    )}
+                    ) : null}
                     <CardHeader className={article.imageUrl ? 'pt-4' : ''}>
                       <CardTitle className="line-clamp-2">{article.title}</CardTitle>
                       <CardDescription className="line-clamp-2 mt-2">{article.excerpt}</CardDescription>
