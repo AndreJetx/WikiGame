@@ -12,6 +12,7 @@ export const DEFAULT_CATEGORIES = [
   { name: "Guias", slug: "guides", description: "Guias para iniciantes e progressão", icon: "guides" },
   { name: "Eventos", slug: "events", description: "Eventos sazonais e missões especiais", icon: "events" },
   { name: "Atualizações", slug: "updates", description: "Notas de atualização e roadmap", icon: "updates" },
+  { name: "Artwork", slug: "artwork", description: "Criação de arte e ilustrações", icon: "artwork" },
 ] as const;
 
 let seeded = false;

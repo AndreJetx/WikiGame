@@ -13,6 +13,7 @@ import pvpIcon from "@assets/pvp-icon.png";
 import eventsIcon from "@assets/events-icon.png";
 import guidesIcon from "@assets/guides-icon.png";
 import updatesIcon from "@assets/updates-icon.png";
+import artworkIcon from "@assets/artwork-icon.png";
 
 type Category = {
   id: string;
@@ -35,6 +36,7 @@ export const CATEGORIES: Category[] = [
   { id: "guides", name: "Guias", slug: "guides", iconSrc: guidesIcon, description: "Guias para iniciantes e progressão" },
   { id: "events", name: "Eventos", slug: "events", iconSrc: eventsIcon, description: "Eventos sazonais e missões especiais" },
   { id: "updates", name: "Atualizações", slug: "updates", iconSrc: updatesIcon, description: "Notas de atualização e roadmap" },
+  { id: "artwork", name: "Artwork", slug: "artwork", iconSrc: artworkIcon, description: "Criação de arte e ilustrações" },
 ];
 
 export function CategoryIcon({
