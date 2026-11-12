@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { CardClickHint } from "@/components/card-click-hint";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Star, BookOpen, Layers, Activity, Eye, Wrench, ExternalLink, ArrowRight } from "lucide-react";
-import { presentTool } from "@/lib/tools";
+import { listToolCards } from "@/lib/tools";
 
 export function Home() {
   const { data: recentArticles, isLoading: isLoadingRecent } = useListRecentArticles({ limit: 4 });
@@ -114,7 +114,7 @@ export function Home() {
           </div>
         </section>
 
-        {(isLoadingTools || (tools && tools.length > 0)) && (
+        {(isLoadingTools || listToolCards(tools).length > 0) && (
           <section>
             <h2 className="text-2xl font-serif font-semibold mb-6 flex items-center gap-2">
               <Wrench className="text-primary w-6 h-6" /> Ferramentas
@@ -125,7 +125,7 @@ export function Home() {
                   <Skeleton key={i} className="h-32 rounded-xl" />
                 ))
               ) : (
-                tools!.map(presentTool).map(tool => {
+                listToolCards(tools).map(tool => {
                   const card = (
                     <Card className="relative h-full hover:border-primary/50 transition-colors bg-card/50 cursor-pointer overflow-hidden group pb-8">
                       <CardHeader>

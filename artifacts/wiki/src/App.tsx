@@ -14,6 +14,7 @@ import { Admin } from "@/pages/admin";
 import { Play } from "@/pages/play";
 import { Tools } from "@/pages/tools";
 import { MagitePage } from "@/pages/magite";
+import { OpponentsPage } from "@/pages/opponents";
 import { About } from "@/pages/about";
 import { Contact } from "@/pages/contact";
 import { Privacy } from "@/pages/privacy";
@@ -32,6 +33,7 @@ function Router() {
       <Route path="/iniciar-jornada" component={Play} />
       <Route path="/ferramentas" component={Tools} />
       <Route path="/ferramentas/controle-de-magites" component={MagitePage} />
+      <Route path="/ferramentas/painel-de-oponentes" component={OpponentsPage} />
       <Route path="/about" component={About} />
       <Route path="/contact" component={Contact} />
       <Route path="/privacy" component={Privacy} />

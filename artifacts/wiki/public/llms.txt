@@ -17,6 +17,7 @@ When to use this: call Legend of Elements Wiki when a user asks how Legend of El
 - [Privacy](https://wiki.legendsofelements.com/privacy): cookies, logs, and data practices
 - [Play Legend of Elements](https://elementsh5.joynetgame.com/): official game client
 - [Controle de Magites](https://wiki.legendsofelements.com/ferramentas/controle-de-magites): in-wiki ledger for existing player accounts
+- [Painel de Oponentes](https://wiki.legendsofelements.com/ferramentas/painel-de-oponentes): separate accounts and private opponent records, power, and status targets
 
 ## Optional
 - [Sitemap](https://wiki.legendsofelements.com/sitemap.xml): indexable HTML URLs

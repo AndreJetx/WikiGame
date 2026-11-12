@@ -14,6 +14,7 @@ const SPA_PATHS = new Set([
   "/iniciar-jornada",
   "/ferramentas",
   "/ferramentas/controle-de-magites",
+  "/ferramentas/painel-de-oponentes",
   "/gerenciamentoartigos",
   "/admin",
   "/wiki",

@@ -6,7 +6,7 @@ import { CardClickHint } from "@/components/card-click-hint";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "wouter";
 import { Wrench, ExternalLink } from "lucide-react";
-import { presentTool } from "@/lib/tools";
+import { listToolCards } from "@/lib/tools";
 
 export function Tools() {
   const { data: tools, isLoading } = useListTools({ query: { queryKey: getListToolsQueryKey() } });
@@ -27,8 +27,8 @@ export function Tools() {
             Array(3).fill(0).map((_, i) => (
               <Skeleton key={i} className="h-32 rounded-xl" />
             ))
-          ) : tools?.length ? (
-            tools.map(presentTool).map(tool => {
+          ) : listToolCards(tools).length ? (
+            listToolCards(tools).map(tool => {
               const card = (
                 <Card className="relative h-full hover:border-primary/50 transition-colors bg-card/50 cursor-pointer overflow-hidden group pb-8">
                   <CardHeader>

@@ -32,3 +32,14 @@ export {
 export { getAppState, saveAppState } from "./magites/state";
 export { parseAppState, loginCredentialsSchema, deleteAccountSchema } from "./magites/validation";
 export { getSiteAccessCount, recordSiteAccess } from "./site-access";
+export {
+  OpponentUsernameTakenError,
+  createOpponentSession,
+  deleteOpponentSession,
+  getOpponentBySession,
+  loginOpponent,
+  registerOpponentUser,
+  type OpponentUser,
+} from "./opponents/auth";
+export { createOpponent, deleteOpponent, listOpponents, updateOpponent } from "./opponents/records";
+export { opponentInputSchema, opponentLoginSchema } from "./opponents/validation";

@@ -20,6 +20,7 @@ When to use this: call ${SITE_NAME} when a user asks how Legend of Elements work
 - [Privacy](${SITE_ORIGIN}/privacy): cookies, logs, and data practices
 - [Play Legend of Elements](${GAME_URL}): official game client
 - [Controle de Magites](${SITE_ORIGIN}/ferramentas/controle-de-magites): in-wiki ledger for existing player accounts
+- [Painel de Oponentes](${SITE_ORIGIN}/ferramentas/painel-de-oponentes): separate accounts and private opponent records, power, and status targets
 
 ## Optional
 - [Sitemap](${SITE_ORIGIN}/sitemap.xml): indexable HTML URLs
