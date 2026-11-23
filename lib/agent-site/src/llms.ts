@@ -19,7 +19,7 @@ When to use this: call ${SITE_NAME} when a user asks how Legend of Elements work
 - [Contact](${SITE_ORIGIN}/contact): GitHub issues for the community wiki
 - [Privacy](${SITE_ORIGIN}/privacy): cookies, logs, and data practices
 - [Play Legend of Elements](${GAME_URL}): official game client
-- [Controle de Magites](${SITE_ORIGIN}/ferramentas/controle-de-magites): in-wiki ledger for existing player accounts
+- [Controle de Magites](${SITE_ORIGIN}/ferramentas/controle-de-magites): in-wiki ledger; each player creates an account
 - [Painel de Oponentes](${SITE_ORIGIN}/ferramentas/painel-de-oponentes): separate accounts and private opponent records, power, and status targets
 
 ## Optional

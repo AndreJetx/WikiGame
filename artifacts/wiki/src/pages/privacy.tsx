@@ -20,10 +20,10 @@ export function Privacy() {
       <h2 className="text-xl font-serif font-semibold text-primary pt-2">Cookies and local storage</h2>
       <p>
         A signed admin session cookie named wiki_admin_session is set only after a successful
-        maintainer login. Controle de Magites sets an httpOnly cookie named magite_session after an
-        existing player signs in, and may keep a local copy of that player's scenarios. There is no
-        public signup for Controle de Magites. Painel de Oponentes lets each player create a separate
-        account and sets an httpOnly cookie named opponent_session. A session cookie named wiki_site_access marks that this browser was already
+        maintainer login. Controle de Magites lets each player create an account and sets an httpOnly
+        cookie named magite_session after they sign in, and may keep a local copy of that player's
+        scenarios. Painel de Oponentes lets each player create a separate account and sets an httpOnly
+        cookie named opponent_session. A session cookie named wiki_site_access marks that this browser was already
         counted for the current visit and stores no name or identifier. Theme preference may be
         stored in localStorage in your browser. You can clear these at any time.
       </p>

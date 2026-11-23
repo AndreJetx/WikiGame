@@ -12,8 +12,31 @@ export interface AuthUser {
   username: string;
 }
 
+export class MagiteUsernameTakenError extends Error {
+  constructor() {
+    super("Este nome de usuário já está em uso.");
+  }
+}
+
+function isUniqueViolation(error: unknown): boolean {
+  const seen = new Set<unknown>();
+  let current: unknown = error;
+  while (current && typeof current === "object" && !seen.has(current)) {
+    seen.add(current);
+    if ("code" in current && (current as { code?: string }).code === "23505") return true;
+    current = "cause" in current ? (current as { cause?: unknown }).cause : undefined;
+  }
+  return false;
+}
+
 function normalizeUsername(username: string): string {
   return username.trim().toLowerCase();
+}
+
+async function hashPassword(password: string): Promise<string> {
+  const salt = randomBytes(16).toString("hex");
+  const derived = (await scryptAsync(password, salt, 64)) as Buffer;
+  return `${salt}:${derived.toString("hex")}`;
 }
 
 async function verifyPassword(password: string, stored: string): Promise<boolean> {
@@ -23,6 +46,22 @@ async function verifyPassword(password: string, stored: string): Promise<boolean
   const actual = Buffer.from(hash, "hex");
   if (derived.length !== actual.length) return false;
   return timingSafeEqual(derived, actual);
+}
+
+export async function registerUser(username: string, password: string): Promise<AuthUser> {
+  const normalized = normalizeUsername(username);
+  const id = randomBytes(12).toString("hex");
+  try {
+    await db.insert(appUsers).values({
+      id,
+      username: normalized,
+      passwordHash: await hashPassword(password),
+    });
+  } catch (error) {
+    if (isUniqueViolation(error)) throw new MagiteUsernameTakenError();
+    throw error;
+  }
+  return { id, username: normalized };
 }
 
 export async function loginUser(username: string, password: string): Promise<AuthUser | null> {

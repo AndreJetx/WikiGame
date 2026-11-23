@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { Link } from 'wouter';
 import { LanguageSwitcher } from './language-switcher';
 import { useLocale } from './use-locale';
-import { login, type AuthUser } from './lib/api';
+import { login, register, type AuthUser } from './lib/api';
 import { translateApiError } from './lib/i18n';
 import { cleanInput } from './lib/sanitize';
 
@@ -16,6 +16,7 @@ export function LoginBackdrop() {
 
 export function LoginScreen({ onLoggedIn }: { onLoggedIn: (user: AuthUser) => void }) {
   const { t } = useLocale();
+  const [creating, setCreating] = useState(false);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -26,7 +27,8 @@ export function LoginScreen({ onLoggedIn }: { onLoggedIn: (user: AuthUser) => vo
     setError('');
     setBusy(true);
     try {
-      onLoggedIn(await login(username, password));
+      const user = creating ? await register(username, password) : await login(username, password);
+      onLoggedIn(user);
     } catch (err) {
       setError(err instanceof Error ? err.message : '__generic__');
     } finally {
@@ -51,8 +53,8 @@ export function LoginScreen({ onLoggedIn }: { onLoggedIn: (user: AuthUser) => vo
               <div className="brand-subtitle">{t('brand.loginSubtitle')}</div>
             </div>
           </div>
-          <h1 className="login-title">{t('login.enter')}</h1>
-          <p className="login-copy">{t('login.enterCopy')}</p>
+          <h1 className="login-title">{creating ? t('login.create') : t('login.enter')}</h1>
+          <p className="login-copy">{creating ? t('login.createCopy') : t('login.enterCopy')}</p>
           <form className="source-form" onSubmit={submit}>
             <div>
               <label htmlFor="auth-username">{t('login.username')}</label>
@@ -65,18 +67,19 @@ export function LoginScreen({ onLoggedIn }: { onLoggedIn: (user: AuthUser) => vo
                 spellCheck={false}
                 required
                 minLength={3}
-                maxLength={254}
+                maxLength={creating ? 32 : 254}
                 value={username}
-                onChange={(event) => setUsername(cleanInput(event.target.value, 254).toLowerCase())}
+                onChange={(event) => setUsername(cleanInput(event.target.value, creating ? 32 : 254).toLowerCase())}
                 data-testid="input-auth-username"
               />
+              {creating ? <p className="field-help">{t('login.usernameHelp')}</p> : null}
             </div>
             <div>
               <label htmlFor="auth-password">{t('login.password')}</label>
               <input
                 id="auth-password"
                 type="password"
-                autoComplete="current-password"
+                autoComplete={creating ? 'new-password' : 'current-password'}
                 required
                 minLength={6}
                 maxLength={128}
@@ -88,7 +91,19 @@ export function LoginScreen({ onLoggedIn }: { onLoggedIn: (user: AuthUser) => vo
             {error && <p className="form-error">{error === '__generic__' ? t('login.generic') : translateApiError(error)}</p>}
             <div className="source-form-actions">
               <button className="button primary" type="submit" disabled={busy} data-testid="button-auth-submit">
-                {busy ? t('login.wait') : t('login.enter')}
+                {busy ? t('login.wait') : creating ? t('login.create') : t('login.enter')}
+              </button>
+              <button
+                className="button soft"
+                type="button"
+                disabled={busy}
+                data-testid="button-auth-switch"
+                onClick={() => {
+                  setCreating((current) => !current);
+                  setError('');
+                }}
+              >
+                {creating ? t('login.hasAccount') : t('login.noAccount')}
               </button>
             </div>
           </form>

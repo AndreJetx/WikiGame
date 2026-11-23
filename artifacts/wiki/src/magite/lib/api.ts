@@ -97,6 +97,17 @@ export async function fetchCurrentUser(): Promise<AuthUser | null> {
   }
 }
 
+export async function register(username: string, password: string): Promise<AuthUser> {
+  const response = await fetch(`${API_BASE}/auth/register`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ username, password }),
+  });
+  if (!response.ok) throw new Error(await readError(response, 'Não foi possível criar a conta.'));
+  return saveSession(response);
+}
+
 export async function login(username: string, password: string): Promise<AuthUser> {
   const response = await fetch(`${API_BASE}/auth/login`, {
     method: 'POST',

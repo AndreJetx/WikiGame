@@ -22,7 +22,9 @@ export const db = drizzle(pool, { schema });
 
 export * from "./schema";
 export {
+  MagiteUsernameTakenError,
   loginUser,
+  registerUser,
   createSession,
   getUserBySession,
   deleteSession,
@@ -30,7 +32,7 @@ export {
   type AuthUser,
 } from "./magites/auth";
 export { getAppState, saveAppState } from "./magites/state";
-export { parseAppState, loginCredentialsSchema, deleteAccountSchema } from "./magites/validation";
+export { parseAppState, credentialsSchema, loginCredentialsSchema, deleteAccountSchema } from "./magites/validation";
 export { getSiteAccessCount, recordSiteAccess } from "./site-access";
 export {
   OpponentUsernameTakenError,

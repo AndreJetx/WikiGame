@@ -1,6 +1,8 @@
 import { Router, type IRouter, type Request, type Response, type NextFunction } from "express";
 import {
+  MagiteUsernameTakenError,
   createSession,
+  credentialsSchema,
   deleteAccountSchema,
   deleteSession,
   deleteUserAccount,
@@ -9,6 +11,7 @@ import {
   loginCredentialsSchema,
   loginUser,
   parseAppState,
+  registerUser,
   saveAppState,
   type AuthUser,
 } from "@workspace/db";
@@ -46,6 +49,28 @@ async function requireAuth(req: Request, res: Response, next: NextFunction) {
 }
 
 const router: IRouter = Router();
+
+router.post("/magites/auth/register", async (req, res) => {
+  const parsed = credentialsSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.issues[0]?.message ?? "Dados inválidos." });
+    return;
+  }
+
+  try {
+    const user = await registerUser(parsed.data.username, parsed.data.password);
+    const token = await createSession(user.id);
+    res.cookie(SESSION_COOKIE, token, sessionCookieOptions());
+    res.status(201).json({ ...user, token });
+  } catch (error) {
+    if (error instanceof MagiteUsernameTakenError) {
+      res.status(409).json({ error: "Este nome de usuário já está em uso." });
+      return;
+    }
+    logger.error({ err: error }, "Failed to create a Controle de Magites account");
+    res.status(500).json({ error: "Não foi possível criar a conta." });
+  }
+});
 
 router.post("/magites/auth/login", async (req, res) => {
   const parsed = loginCredentialsSchema.safeParse(req.body);
